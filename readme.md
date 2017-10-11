@@ -1,4 +1,4 @@
-# eslint-plugin-better-migration [![CircleCI](https://circleci.com/gh/sloops77/eslint-plugin-better-mutation.svg?style=svg)](https://circleci.com/gh/sloops77/eslint-plugin-better-mutation)
+# eslint-plugin-better-mutation [![CircleCI](https://circleci.com/gh/sloops77/eslint-plugin-better-mutation.svg?style=svg)](https://circleci.com/gh/sloops77/eslint-plugin-better-mutation)
 
 ESLint rules for better mutation rules
 
@@ -10,7 +10,7 @@ $ npm install --save-dev eslint eslint-plugin-better-mutation
 
 ## Usage
 
-Configure it in `package.json`.
+Configure it in `.eslintrc`.
 
 <!-- EXAMPLE_CONFIGURATION:START -->
 ```json
@@ -47,16 +47,16 @@ Configure it in `package.json`.
 
 This plugin exports a [`recommended` configuration](index.js) that enforces good practices.
 
-To enable this configuration, use the `extends` property in your `package.json`.
+To enable this configuration, use the `extends` property in your `.eslintrc`.
 
 ```json
 {
   "name": "my-awesome-project",
   "eslintConfig": {
     "plugins": [
-      "better-migration"
+      "better-mutation"
     ],
-    "extends": "plugin:better-migration/recommended"
+    "extends": "plugin:better-mutation/recommended"
   }
 }
 ```
