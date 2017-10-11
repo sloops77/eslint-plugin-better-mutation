@@ -3,6 +3,7 @@
 .eclipse/
 **/*.iml
 .vscode/
+.nyc_output
 
 # exclude run configurations
 !.idea/runConfigurations/

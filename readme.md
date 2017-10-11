@@ -1,4 +1,4 @@
-# eslint-plugin-better-migration [![Build Status](https://travis-ci.org/jfmengels/eslint-plugin-better-migration.svg?branch=master)](https://travis-ci.org/jfmengels/eslint-plugin-better-migration)
+# eslint-plugin-better-migration [![CircleCI](https://circleci.com/gh/sloops77/eslint-plugin-better-mutation.svg?style=svg)](https://circleci.com/gh/sloops77/eslint-plugin-better-mutation)
 
 ESLint rules for better mutation rules
 
