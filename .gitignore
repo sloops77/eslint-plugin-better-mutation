@@ -1,0 +1,30 @@
+# IDE files
+.idea/*
+.eclipse/
+**/*.iml
+.vscode/
+
+# exclude run configurations
+!.idea/runConfigurations/
+
+# NPM files
+
+**/node_modules/
+**/*.log*
+
+# coverage
+**/coverage/
+
+# dumps
+dump/
+
+**/dist/
+**/lib/
+**/lib-es6/
+.logs/
+.artifacts/
+
+*.DS_Store
+*.swp
+
+.yarnclean
