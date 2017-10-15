@@ -53,7 +53,7 @@ function isVariableDeclaration(arg) {
   return function (node) {
     // todo support multiple declarations
     const declaration = _.get('declarations[0]', node);
-    return node.type === 'VariableDeclaration' &&
+    return _.get(node, 'type') === 'VariableDeclaration' &&
     _.isMatch({type: 'VariableDeclarator', id: {name: argName}}, declaration) &&
     isValidInit(_.get('init', declaration), node);
   };
