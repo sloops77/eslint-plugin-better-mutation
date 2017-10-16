@@ -50,12 +50,13 @@ function isValidInit(rhsExpression, node) {
 
 function isVariableDeclaration(arg) {
   const argName = _.get('name', arg);
-  return function (node = {}) { // todo not sure about this defaulting. seems to fix weird bug
+  return function (node) { // todo not sure about this defaulting. seems to fix weird bug
     // todo support multiple declarations
-    const declaration = _.get('declarations[0]', node);
-    return node.type === 'VariableDeclaration' &&
+    const finalNode = node || {};
+    const declaration = _.get('declarations[0]', finalNode);
+    return finalNode.type === 'VariableDeclaration' &&
     _.isMatch({type: 'VariableDeclarator', id: {name: argName}}, declaration) &&
-    isValidInit(_.get('init', declaration), node);
+    isValidInit(_.get('init', declaration), finalNode);
   };
 }
 
