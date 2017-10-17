@@ -27,6 +27,7 @@ ruleTester.run('no-mutating-methods', rule, {
     'value.bar()',
     'value.concat()',
     'value["foo"](a)',
+    '[].push(a)',
     {
       code: '_.push(a, b)',
       options: [{
