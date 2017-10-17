@@ -73,8 +73,8 @@ function isScopedVariable(arg, node) {
     return false;
   }
 
-  console.dir(node.type);
-  console.dir(arg);
+  // console.dir(node.type);
+  // console.dir(arg);
   return _.some(isVariableDeclaration(arg))(node.body) || isForStatementVariable(arg, node) || (!isEndOfBlock(node) && isScopedVariable(arg, node.parent));
 }
 
