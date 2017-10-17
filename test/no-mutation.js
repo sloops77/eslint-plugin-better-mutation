@@ -27,6 +27,9 @@ ruleTester.run('no-mutation', rule, {
     'const a = 2;',
     'function foo(a={}) {}',
     'let a = 1; a = 2;',
+    'let a = ""; if (false) { a += "b"; }',
+    'var b = { x: 1 }; b.x += 1;',
+    'for(var i = 0; i < 3; i+=1) {}',
     {
       code: 'exports = {};',
       options: [{commonjs: true}]

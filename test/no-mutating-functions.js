@@ -37,7 +37,8 @@ ruleTester.run('no-mutating-functions', rule, {
     'var b = {}; var a = b; Object.assign(a, b);',
     'var b = {foo: 1}; var a = b.foo; Object.assign(a, c);',
     'var a = x === 1 ? {} : { foo: 1 }; Object.assign(a, c);',
-    'var b = {}; var a = x === 1 ? b : { foo: 1 }; Object.assign(a, c);'
+    'var b = {}; var a = x === 1 ? b : { foo: 1 }; Object.assign(a, c);',
+    'var b = { x: {} }; Object.assign(b.x, {a: 1})',
   ],
   invalid: [
     {
