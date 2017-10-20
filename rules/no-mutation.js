@@ -1,7 +1,7 @@
 'use strict';
 
 const _ = require('lodash/fp');
-const {isScopedVariable} = require('./utils/common');
+const {isScopedVariable, isScopedFunction} = require('./utils/common');
 
 const isModuleExports = _.matches({
   type: 'MemberExpression',
@@ -19,6 +19,19 @@ const isExports = _.matches({
   type: 'Identifier', name: 'exports'
 });
 
+const isPrototype = _.matches({
+  type: 'MemberExpression',
+  object: {
+    object: {
+      type: 'Identifier',
+    },
+    property: {
+      type: 'Identifier',
+      name: 'prototype'
+    }  
+  }
+});
+
 function isModuleExportsMemberExpression(node) {
   return _.overSome([
     isExports,
@@ -27,6 +40,13 @@ function isModuleExportsMemberExpression(node) {
       return node.type === 'MemberExpression' && isModuleExportsMemberExpression(node.object);
     }
   ])(node);
+}
+
+const isPrototypeAssignment = (node) => {
+  return _.flow(
+    _.property('left'),
+    isPrototype
+  )(node) && isScopedFunction(node.left, node.parent)
 }
 
 const isCommonJsExport = _.flow(
@@ -38,9 +58,25 @@ const isCommonJsExport = _.flow(
   ])
 );
 
-function errorMessage(isCommonJs) {
+const ERROR_TYPES = {
+  COMMON_JS: 'COMMON_JS', 
+  PROTOTYPE: 'PROTOTYPE',
+  REGULAR: 'REGULAR'
+}
+
+function errorMessage(errorType) {
   const baseMessage = 'Unallowed reassignment';
-  return baseMessage + (isCommonJs ? '. You may want to activate the `commonjs` option for this rule' : '');
+  let extraInfo = '';
+  switch (errorType) {
+    case ERROR_TYPES.COMMON_JS: 
+      extraInfo = '. You may want to activate the `commonjs` option for this rule'
+      break;
+    case ERROR_TYPES.PROTOTYPE:
+      extraInfo = '. You may want to activate the `prototypes` option for this rule'
+      break;
+  }
+
+  return baseMessage + extraInfo;
 }
 
 function makeException(exception) {
@@ -68,7 +104,9 @@ function isExempted(exceptions, node) {
 
 const create = function (context) {
   const options = context.options[0] || {};
+  const allowFunctionProps = options.functionProps;
   const acceptCommonJs = options.commonjs;
+  const acceptPrototypes = options.prototypes;
   const exceptions = _.map(makeException, options.exceptions);
   if (options.allowThis) {
     exceptions.push(_.matches({type: 'MemberExpression', object: {type: 'ThisExpression'}}));
@@ -76,15 +114,26 @@ const create = function (context) {
   return {
     AssignmentExpression(node) {
       const isCommonJs = isCommonJsExport(node);
+      const isPrototypeAss = isPrototypeAssignment(node);
+
       if ((isCommonJs && acceptCommonJs) ||
+        (isPrototypeAss && acceptPrototypes) ||
         isExempted(exceptions, node.left) ||
-        isScopedVariable(node.left, node.parent)) {
+        isScopedVariable(node.left, node.parent, allowFunctionProps)) {
         return;
       }
+
+      let errorType = ERROR_TYPES.REGULAR;
+      if (isCommonJs) {
+        errorType = ERROR_TYPES.COMMON_JS;
+      } else if (isPrototypeAss) {
+        errorType = ERROR_TYPES.PROTOTYPE;
+      }
+
       context.report({
         node,
-        message: errorMessage(isCommonJs)
-      });
+        message: errorMessage(errorType)
+      });     
     },
     UpdateExpression(node) {
       context.report({
@@ -102,6 +151,12 @@ const schema = [{
       type: 'boolean'
     },
     allowThis: {
+      type: 'boolean'
+    },
+    prototypes: {
+      type: 'boolean'
+    },
+    functionProps: {
       type: 'boolean'
     },
     exceptions: {

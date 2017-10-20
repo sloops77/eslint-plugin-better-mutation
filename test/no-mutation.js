@@ -19,6 +19,7 @@ const reassignmentError = error('Unallowed reassignment');
 const incrementError = error('Unallowed use of `++` operator');
 const decrementError = error('Unallowed use of `--` operator');
 const commonJsError = error('Unallowed reassignment. You may want to activate the `commonjs` option for this rule');
+const prototypesError = error('Unallowed reassignment. You may want to activate the `prototypes` option for this rule');
 
 ruleTester.run('no-mutation', rule, {
   valid: [
@@ -30,6 +31,7 @@ ruleTester.run('no-mutation', rule, {
     'let a = ""; if (false) { a += "b"; }',
     'var b = { x: 1 }; b.x += 1;',
     'for(var i = 0; i < 3; i+=1) {}',
+    // 'let a = c(); a = 1;',
     {
       code: 'exports = {};',
       options: [{commonjs: true}]
@@ -109,9 +111,33 @@ ruleTester.run('no-mutation', rule, {
     {
       code: 'function bar() { this.foo = 100; }',
       options: [{allowThis: true}]
-    }
+    },
+    {
+      code: 'class Clazz {}; Clazz.staticFoo = 3',
+      options: [{functionProps: true}]
+    },
+    {
+      code: 'function foo() {}; foo.metadata = {}',
+      options: [{functionProps: true}]
+    },
+    {
+      code: 'function Clazz() { }; Clazz.prototype.foo = function() {}',
+      options: [{prototypes: true}]
+    },
   ],
   invalid: [
+    {
+      code: 'class Clazz {}; Clazz.staticFoo = 3',
+      errors: [reassignmentError]
+    },
+    {
+      code: 'function foo() {}; foo.metadata = {}',
+      errors: [reassignmentError]
+    },
+    {
+      code: 'function Clazz() { }; Clazz.prototype.foo = function() {}',
+      errors: [prototypesError]
+    },
     {
       code: 'a = 2;',
       errors: [reassignmentError]
