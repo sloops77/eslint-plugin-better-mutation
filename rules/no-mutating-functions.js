@@ -59,18 +59,19 @@ function buildIsMutatingFunction(ignoredMethods, useLodashFunctionImports) {
   return _.overSome(_.map(spec => _.matches(spec), matchesSpecs));
 }
 
-function isAllowedFirstArgument(arg, node) {
-  return isObjectExpression(arg) || isFunctionExpression(arg) || isScopedVariable(arg, node.parent);
+function isAllowedFirstArgument(arg, node, allowFunctionProps) {
+  return isObjectExpression(arg) || isFunctionExpression(arg) || isScopedVariable(arg, node.parent, allowFunctionProps);
 }
 
 const create = function (context) {
   const ignoredMethods = _.getOr([], ['options', 0, 'ignoreMethods'], context);
   const useLodashFunctionImports = _.getOr(false, ['options', 0, 'useLodashFunctionImports'], context);
+  const allowFunctionProps = _.getOr(false, ['options', 0, 'functionProps'], context);
   const isMutatingFunction = buildIsMutatingFunction(ignoredMethods, useLodashFunctionImports);
 
   return {
     CallExpression(node) {
-      if (isMutatingFunction(node.callee) && !isAllowedFirstArgument(node.arguments[0], node)) {
+      if (isMutatingFunction(node.callee) && !isAllowedFirstArgument(node.arguments[0], node, allowFunctionProps)) {
         context.report({
           node,
           message: 'Unallowed use of mutating functions'
@@ -86,6 +87,9 @@ module.exports = {
     schema: [{
       type: 'object',
       properties: {
+        functionProps: {
+          type: 'boolean'
+        },
         ignoredMethods: {
           type: 'array',
           items: {
