@@ -117,6 +117,14 @@ ruleTester.run('no-mutation', rule, {
       options: [{functionProps: true}]
     },
     {
+      code: 'export default class Clazz {}; Clazz.staticFoo = 3',
+      options: [{functionProps: true}]
+    },
+    {
+      code: 'export class Clazz {}; Clazz.staticFoo = 3',
+      options: [{functionProps: true}]
+    },
+    {
       code: 'function foo() {}; foo.metadata = {}',
       options: [{functionProps: true}]
     },

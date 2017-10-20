@@ -5,6 +5,11 @@ const isReference = _.flow(
   _.includes(_, ['MemberExpression', 'Identifier'])
 );
 
+const isExportDeclaration = _.flow(
+  _.property('type'),
+  _.includes(_, ['ExportDefaultDeclaration', 'ExportNamedDeclaration'])
+);
+
 const isObjectExpression = _.flow(
   _.property('type'),
   _.includes(_, ['ObjectExpression', 'ArrayExpression'])
@@ -42,6 +47,12 @@ const isEndOfBlock = _.flow(
 
 function isFunctionDeclaration(identifier) {
   return _.overEvery([isClassOrFunctionDeclaration, _.matches({ id: { name: identifier } })])
+}
+
+function isExportedFunctionDeclaration(identifier) {
+  return function (node) {
+    return isExportDeclaration(node) && isFunctionDeclaration(identifier)(_.get('declaration')(node));
+  }
 }
 
 function isForStatementVariable(identifier, node) {
@@ -111,6 +122,11 @@ function isScopedFunctionIdentifier(identifier, node) {
   if (_.isNil(node)) {
     return false;
   }
+
+  return _.some(
+    (n) => isFunctionDeclaration(identifier)(n) || isExportedFunctionDeclaration(identifier)(n)
+  )(node.body) || 
+    (!isEndOfBlock(node) && isScopedFunctionIdentifier(identifier, node.parent));  
 
   return _.some(isFunctionDeclaration(identifier))(node.body) || (!isEndOfBlock(node) && isScopedFunctionIdentifier(identifier, node.parent));  
 }
