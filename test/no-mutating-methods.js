@@ -54,7 +54,12 @@ ruleTester.run('no-mutating-methods', rule, {
     },
     'Object.keys(a)',
     'Object.values(a)',
-    'var value = []; value.copyWithin(a);'
+    'var value = []; value.copyWithin(a);',
+    'function fn () {const o = {}; Object.defineProperty(o, "foo")}',
+    {
+      code: 'function fn() {}; Object.defineProperty(fn, "foo");',
+      options: [{ functionProps: true }]
+    }
   ],
   invalid: [
     {

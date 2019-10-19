@@ -33,9 +33,14 @@ function getNameIfPropertyIsLiteral(property) {
     property.value;
 }
 
+function isAllowedFirstArgument(arg, node, allowFnProps) {
+  return isScopedVariable(arg, node.parent, allowFnProps);
+}
+
 const create = function (context) {
   const options = context.options[0] || {};
   const allowedObjects = options.allowedObjects || [];
+  const allowFnProps = options.functionProps || false;
 
   return {
     CallExpression(node) {
@@ -48,7 +53,7 @@ const create = function (context) {
       }
 
       if (node.callee.object.name === 'Object') {
-        if (mutatingObjectMethods.indexOf(node.callee.property.name) !== -1) {
+        if (mutatingObjectMethods.indexOf(node.callee.property.name) !== -1 && !isAllowedFirstArgument(node.arguments[0], node, allowFnProps)) {
           context.report({
             node,
             message: `The use of method \`Object.${node.callee.property.name}\` is not allowed as it will mutate its arguments`
