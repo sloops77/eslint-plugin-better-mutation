@@ -31,6 +31,7 @@ ruleTester.run('no-mutation', rule, {
     'let a = ""; if (false) { a += "b"; }',
     'var b = { x: 1 }; b.x += 1;',
     'for(var i = 0; i < 3; i+=1) {}',
+    'function foo() {const a = {}; if (true) {a.b = "c"}}',
     // 'let a = c(); a = 1;',
     {
       code: 'exports = {};',
