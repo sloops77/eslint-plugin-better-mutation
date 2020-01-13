@@ -1,10 +1,11 @@
-version: 2
+version: 2.1
+orbs:
+  codecov: codecov/codecov@1.0.4
 jobs:
   build:
     docker: 
-      - image: circleci/node:6.10.3
+      - image: circleci/node:10
     environment:
-    #   COVERALLS_REPO_TOKEN: "fsVv3ZKZ4rZeUPKHC1IOycaEobCSR3k1c"
     working_directory: ~/eslint-plugin-better-mutation
     steps:
           - checkout
@@ -19,15 +20,16 @@ jobs:
           - run:
               name: Run Tests
               command: yarn run test
-        #   - store_test_results:
-        #       path: ./.artifacts/test_results
-        #   - store_test_results:
-        #       path: ./.artifacts/lint_results
-        #   - run:
-        #       name: Uploading coverage to coveralls...
-        #       command: cat ./.artifacts/coverage/*/lcov.info | ./node_modules/.bin/coveralls
           - save_cache:
               key: yarn-cache-{{ checksum "yarn.lock" }}
               paths:
                 - node_modules
-        
+
+          - store_artifacts:
+              path: coverage
+          - store_test_results:
+              path: reports/junit
+          - store_artifacts:
+              path: reports/junit
+          - codecov/upload:
+              file: coverage/lcov.info
