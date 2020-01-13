@@ -1,6 +1,6 @@
 'use strict';
 
-const { isObjectExpression, isScopedVariable } = require('./utils/common');
+const {isObjectExpression, isScopedVariable} = require('./utils/common');
 
 const mutatingMethods = [
   'copyWithin',
@@ -23,13 +23,13 @@ const mutatingObjectMethods = [
 
 function getNameIfPropertyIsIdentifier(property) {
   return property.type === 'Identifier' &&
-    mutatingMethods.indexOf(property.name) !== -1 &&
+    mutatingMethods.includes(property.name) &&
     property.name;
 }
 
 function getNameIfPropertyIsLiteral(property) {
   return property.type === 'Literal' &&
-    mutatingMethods.indexOf(property.value) !== -1 &&
+    mutatingMethods.includes(property.value) &&
     property.value;
 }
 
@@ -43,17 +43,18 @@ const create = function (context) {
         return;
       }
 
-      if (node.callee.object.type === 'Identifier' && allowedObjects.indexOf(node.callee.object.name) !== -1) {
+      if (node.callee.object.type === 'Identifier' && allowedObjects.includes(node.callee.object.name)) {
         return;
       }
 
       if (node.callee.object.name === 'Object') {
-        if (mutatingObjectMethods.indexOf(node.callee.property.name) !== -1) {
+        if (mutatingObjectMethods.includes(node.callee.property.name)) {
           context.report({
             node,
             message: `The use of method \`Object.${node.callee.property.name}\` is not allowed as it will mutate its arguments`
           });
         }
+
         return;
       }
 
@@ -63,7 +64,6 @@ const create = function (context) {
           node,
           message: `The use of method \`${name}\` is not allowed as it might be a mutating method`
         });
-        return;
       }
     }
   };
