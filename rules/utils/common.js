@@ -20,11 +20,6 @@ const isLiteralExpression = _.flow(
   _.includes(_, ['Literal'])
 );
 
-const isCallExpression = _.flow(
-  _.property('type'),
-  _.includes(_, ['CallExpression'])
-);
-
 const isFunctionExpression = _.flow(
   _.property('type'),
   _.includes(_, ['FunctionExpression', 'ArrowFunctionExpression'])
@@ -46,13 +41,13 @@ const isEndOfBlock = _.flow(
 );
 
 function isFunctionDeclaration(identifier) {
-  return _.overEvery([isClassOrFunctionDeclaration, _.matches({ id: { name: identifier } })])
+  return _.overEvery([isClassOrFunctionDeclaration, _.matches({id: {name: identifier}})]);
 }
 
 function isExportedFunctionDeclaration(identifier) {
   return function (node) {
     return isExportDeclaration(node) && isFunctionDeclaration(identifier)(_.get('declaration')(node));
-  }
+  };
 }
 
 function isForStatementVariable(identifier, node) {
@@ -77,7 +72,7 @@ function getReference(node) {
 function isValidInit(rhsExpression, node) {
   return isObjectExpression(rhsExpression) ||
     isLiteralExpression(rhsExpression) ||
-    // fix 'let a = c(); a = 1;' by ensuring that function c() { return  {} };
+    // Fix 'let a = c(); a = 1;' by ensuring that function c() { return  {} };
     // isCallExpression(rhsExpression) /* && called Function always returns a ValidInit */ ||
     (isReference(rhsExpression) && isScopedVariable(getReference(rhsExpression), node.parent)) ||
     (isConditionalExpression(rhsExpression) && isValidInit(rhsExpression.alternate, node) && isValidInit(rhsExpression.consequent, node));
@@ -88,11 +83,12 @@ function getLeftMostObject(arg) {
   if (!obj) {
     return arg;
   }
+
   return getLeftMostObject(obj);
 }
 
 function isVariableDeclaration(identifier) {
-  return function (node) { // todo not sure about this defaulting. seems to fix weird bug
+  return function (node) { // Todo not sure about this defaulting. seems to fix weird bug
     // todo support multiple declarations
     const finalNode = node || {};
     const declaration = _.get('declarations[0]', finalNode);
@@ -107,9 +103,9 @@ function isScopedVariableIdentifier(identifier, node, allowFunctionProps) {
     return false;
   }
 
-  return _.some(isVariableDeclaration(identifier))(node.body) || 
-    allowFunctionProps && isScopedFunctionIdentifier(identifier, node) ||
-    isForStatementVariable(identifier, node) || 
+  return _.some(isVariableDeclaration(identifier))(node.body) ||
+    (allowFunctionProps && isScopedFunctionIdentifier(identifier, node)) ||
+    isForStatementVariable(identifier, node) ||
     (!isEndOfBlock(node) && isScopedVariableIdentifier(identifier, node.parent));
 }
 
@@ -124,11 +120,9 @@ function isScopedFunctionIdentifier(identifier, node) {
   }
 
   return _.some(
-    (n) => isFunctionDeclaration(identifier)(n) || isExportedFunctionDeclaration(identifier)(n)
-  )(node.body) || 
-    (!isEndOfBlock(node) && isScopedFunctionIdentifier(identifier, node.parent));  
-
-  return _.some(isFunctionDeclaration(identifier))(node.body) || (!isEndOfBlock(node) && isScopedFunctionIdentifier(identifier, node.parent));  
+    n => isFunctionDeclaration(identifier)(n) || isExportedFunctionDeclaration(identifier)(n)
+  )(node.body) ||
+    (!isEndOfBlock(node) && isScopedFunctionIdentifier(identifier, node.parent));
 }
 
 function isScopedFunction(arg, node) {

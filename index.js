@@ -1,9 +1,9 @@
 'use strict';
 
-const reqAll = require('req-all');
+const importModules = require('import-modules');
 const createIndex = require('create-eslint-index');
 
-const rules = reqAll('rules', {camelize: false});
+const rules = importModules('rules', {camelize: false});
 
 const externalRecommendedRules = {
   'no-var': 'error'
