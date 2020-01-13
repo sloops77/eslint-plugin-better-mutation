@@ -9,9 +9,6 @@ jobs:
     working_directory: ~/eslint-plugin-better-mutation
     steps:
           - checkout
-          - run:
-              name: Update yarn
-              command: 'sudo npm install -g yarn@latest'
           - restore_cache:
               key: yarn-cache-{{ checksum "yarn.lock" }}
           - run: 
