@@ -13,7 +13,11 @@
     "node": ">=10.0.0"
   },
   "scripts": {
-    "test": "xo && nyc ava"
+    "init:ci": "rimraf reports && mkdir -p reports",
+    "lint": "xo",
+    "lint:ci": "xo --reporter junit > reports/lint-results.xml",
+    "test": "nyc ava",
+    "test:ci": "nyc --reporter=lcov ava --tap | tap-xunit > reports/test-results.xml"
   },
   "files": [
     "index.js",
@@ -40,8 +44,8 @@
   "dependencies": {
     "create-eslint-index": "~1.0.0",
     "eslint-ast-utils": "~1.0.0",
-    "lodash": "~4.17.15",
-    "import-modules": "~2.0.0"
+    "import-modules": "~2.0.0",
+    "lodash": "~4.17.15"
   },
   "devDependencies": {
     "ava": "~2.4.0",
@@ -50,6 +54,8 @@
     "inject-in-tag": "^1.1.1",
     "nyc": "~15.0.0",
     "pify": "~4.0.1",
+    "rimraf": "^3.0.0",
+    "tap-xunit": "^2.4.1",
     "xo": "~0.25.3"
   },
   "peerDependencies": {
