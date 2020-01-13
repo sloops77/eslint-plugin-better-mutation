@@ -1,6 +1,25 @@
-# eslint-plugin-better-mutation [![CircleCI](https://circleci.com/gh/sloops77/eslint-plugin-better-mutation.svg?style=svg)](https://circleci.com/gh/sloops77/eslint-plugin-better-mutation)
+# eslint-plugin-better-mutation 
+[![CircleCI](https://circleci.com/gh/sloops77/eslint-plugin-better-mutation.svg?style=svg)](https://circleci.com/gh/sloops77/eslint-plugin-better-mutation)
+[![codecov](https://codecov.io/gh/sloops77/eslint-plugin-better-mutation/branch/master/graph/badge.svg)](https://codecov.io/gh/sloops77/eslint-plugin-better-mutation)
+[![XO code style](https://img.shields.io/badge/code_style-XO-5ed9c7.svg)](https://github.com/xojs/xo)
 
-ESLint rules for better mutation rules
+ESLint rules so you and your team obey the rules of better mutation
+
+## The why?
+
+You know that immutability is preferable, but actually some mutation is totally safe.
+
+Functional languages like clojure offer atomics to offer controlled mutation
+
+The problem is you are using javascript so how do you make sure you and your team follow 
+the rules. You want to enforce immutability by default, but permit safe mutation. 
+
+This is what eslint plugin was created for.
+
+It ensures that variables from outside of your scope such as function parameters or 
+globals are never modified using operators, assignment, mutating collection calls
+and includes support for lodash. And if you are promoting the use of Ramda or lodash/fp you can add exemptions for 
+these libraries 
 
 ## Install
 

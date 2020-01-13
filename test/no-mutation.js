@@ -132,7 +132,7 @@ ruleTester.run('no-mutation', rule, {
     {
       code: 'function Clazz() { }; Clazz.prototype.foo = function() {}',
       options: [{prototypes: true}]
-    },
+    }
   ],
   invalid: [
     {

@@ -41,8 +41,8 @@ ruleTester.run('no-mutating-functions', rule, {
     'var b = { x: {} }; Object.assign(b.x, {a: 1})',
     {
       code: 'function fn() {}; Object.assign(fn, b);',
-      options: [{ functionProps: true }]
-    },
+      options: [{functionProps: true}]
+    }
   ],
   invalid: [
     {
