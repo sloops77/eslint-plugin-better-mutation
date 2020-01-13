@@ -15,8 +15,14 @@ jobs:
               name: Install Dependencies
               command: yarn
           - run:
+              name: Init CI
+              command: yarn run init:ci
+          - run:
+              name: Run Lint
+              command: yarn run lint:ci
+          - run:
               name: Run Tests
-              command: yarn run test
+              command: yarn run test:ci
           - save_cache:
               key: yarn-cache-{{ checksum "yarn.lock" }}
               paths:
@@ -25,8 +31,8 @@ jobs:
           - store_artifacts:
               path: coverage
           - store_test_results:
-              path: reports/junit
+              path: reports
           - store_artifacts:
-              path: reports/junit
+              path: reports
           - codecov/upload:
               file: coverage/lcov.info
