@@ -18,7 +18,7 @@ module.exports = {
   rules,
   configs: {
     recommended: {
-      rules: Object.assign({}, internalRecommendedRules, externalRecommendedRules)
+      rules: { ...internalRecommendedRules, ...externalRecommendedRules }
     }
   }
 };
