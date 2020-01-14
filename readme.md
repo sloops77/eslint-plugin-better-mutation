@@ -3,23 +3,19 @@
 [![codecov](https://codecov.io/gh/sloops77/eslint-plugin-better-mutation/branch/master/graph/badge.svg)](https://codecov.io/gh/sloops77/eslint-plugin-better-mutation)
 [![XO code style](https://img.shields.io/badge/code_style-XO-5ed9c7.svg)](https://github.com/xojs/xo)
 
-ESLint rules so you and your team obey the rules of better mutation
+ESLint rules so you and your team use immutable values when you should, and permits mutation when it's safe.
 
-## The why?
+Preventing mutation of shared variables prevents a huge class of bugs from ever appearing.
 
-You know that immutability is preferable, but actually some mutation is totally safe.
+## What?
 
-Functional languages like clojure offer atomics to offer controlled mutation
+This eslint plugin sets rules for when to use immutable operations and when to permit mutation. 
 
-The problem is you are using javascript so how do you make sure you and your team follow 
-the rules. You want to enforce immutability by default, but permit safe mutation. 
+It aims to prevent "borrowed" variables, such as function parameters or globals, from ever being modified using operators, assignment or mutating functions or methods. 
 
-This is what eslint plugin was created for.
+Locally declared variables are permitted to use mutation, because in most circumstances this is safe.
 
-It ensures that variables from outside of your scope such as function parameters or 
-globals are never modified using operators, assignment, mutating collection calls
-and includes support for lodash. And if you are promoting the use of Ramda or lodash/fp you can add exemptions for 
-these libraries 
+See [WHY.](why.md)
 
 ## Install
 
@@ -52,13 +48,12 @@ Configure it in `.eslintrc`.
 ```
 <!-- EXAMPLE_CONFIGURATION:END -->
 
-
 ## Rules
 
 <!-- RULES:START -->
-- [no-mutating-functions](docs/rules/no-mutating-functions.md) - Forbid the use of [`Object.assign() and lodash mutation methods`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/assign) with a non-local variable as first argument.
-- [no-mutating-methods](docs/rules/no-mutating-methods.md) - Forbid the use of mutating methods on non-local variables.
 - [no-mutation](docs/rules/no-mutation.md) - Forbid the use of mutating operators on non-local variables.
+- [no-mutating-methods](docs/rules/no-mutating-methods.md) - Forbid the use of mutating methods on non-local variables such as push or _.remove.
+- [no-mutating-functions](docs/rules/no-mutating-functions.md) - Forbid the use of [`Object.assign() and lodash mutation methods`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/assign) with a non-local variable as first argument.
 
 <!-- RULES:END -->
 
@@ -84,4 +79,4 @@ See [ESLint documentation](http://eslint.org/docs/user-guide/configuring#extendi
 
 MIT © [Andres Olave](https://github.com/sloops77)
 
-Thanks to [Jeroen Engels](https://github.com/jfmengels). Checkout https://github.com/jfmengels/eslint-plugin-fp for a real functional programming eslint
+Thanks to [Jeroen Engels](https://github.com/jfmengels) for providing the basis of this plugin. Checkout https://github.com/jfmengels/eslint-plugin-fp for a strict functional programming approach.
