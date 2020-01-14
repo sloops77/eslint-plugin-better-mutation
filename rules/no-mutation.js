@@ -23,12 +23,12 @@ const isPrototype = _.matches({
   type: 'MemberExpression',
   object: {
     object: {
-      type: 'Identifier',
+      type: 'Identifier'
     },
     property: {
       type: 'Identifier',
       name: 'prototype'
-    }  
+    }
   }
 });
 
@@ -42,12 +42,12 @@ function isModuleExportsMemberExpression(node) {
   ])(node);
 }
 
-const isPrototypeAssignment = (node) => {
+const isPrototypeAssignment = node => {
   return _.flow(
     _.property('left'),
     isPrototype
-  )(node) && isScopedFunction(node.left, node.parent)
-}
+  )(node) && isScopedFunction(node.left, node.parent);
+};
 
 const isCommonJsExport = _.flow(
   _.property('left'),
@@ -59,20 +59,22 @@ const isCommonJsExport = _.flow(
 );
 
 const ERROR_TYPES = {
-  COMMON_JS: 'COMMON_JS', 
+  COMMON_JS: 'COMMON_JS',
   PROTOTYPE: 'PROTOTYPE',
   REGULAR: 'REGULAR'
-}
+};
 
 function errorMessage(errorType) {
   const baseMessage = 'Unallowed reassignment';
   let extraInfo = '';
   switch (errorType) {
-    case ERROR_TYPES.COMMON_JS: 
-      extraInfo = '. You may want to activate the `commonjs` option for this rule'
+    case ERROR_TYPES.COMMON_JS:
+      extraInfo = '. You may want to activate the `commonjs` option for this rule';
       break;
     case ERROR_TYPES.PROTOTYPE:
-      extraInfo = '. You may want to activate the `prototypes` option for this rule'
+      extraInfo = '. You may want to activate the `prototypes` option for this rule';
+      break;
+    default:
       break;
   }
 
@@ -83,13 +85,16 @@ function makeException(exception) {
   if (!exception.object && !exception.property) {
     return _.stubFalse;
   }
+
   let query = {type: 'MemberExpression'};
   if (exception.object) {
     query = _.assign(query, {object: {type: 'Identifier', name: exception.object}});
   }
+
   if (exception.property) {
     query = _.assign(query, {property: {type: 'Identifier', name: exception.property}});
   }
+
   return _.matches(query);
 }
 
@@ -97,6 +102,7 @@ function isExempted(exceptions, node) {
   if (node.type !== 'MemberExpression') {
     return false;
   }
+
   const matches = exceptions.some(matcher => matcher(node));
   return matches ||
     (node.object.type === 'MemberExpression' && isExempted(exceptions, node.object));
@@ -111,6 +117,7 @@ const create = function (context) {
   if (options.allowThis) {
     exceptions.push(_.matches({type: 'MemberExpression', object: {type: 'ThisExpression'}}));
   }
+
   return {
     AssignmentExpression(node) {
       const isCommonJs = isCommonJsExport(node);
@@ -133,7 +140,7 @@ const create = function (context) {
       context.report({
         node,
         message: errorMessage(errorType)
-      });     
+      });
     },
     UpdateExpression(node) {
       context.report({

@@ -1,7 +1,7 @@
 {
   "name": "eslint-plugin-better-mutation",
   "version": "1.1.2",
-  "description": "ESLint rules for functional programming",
+  "description": "ESLint rules for controlling where and how mutation is used.",
   "license": "MIT",
   "repository": "sloops77/eslint-plugin-better-mutation",
   "author": {
@@ -10,11 +10,14 @@
     "url": "github.com/sloops77"
   },
   "engines": {
-    "node": ">=4.0.0"
+    "node": ">=10.0.0"
   },
   "scripts": {
-    "test": "xo && nyc ava",
-    "update-md": "inject-in-tag ./rule-description.js readme.md"
+    "init:ci": "rimraf reports && mkdir -p reports",
+    "lint": "xo",
+    "lint:ci": "xo --reporter junit > reports/lint-results.xml",
+    "test": "nyc ava",
+    "test:ci": "nyc --reporter=lcov ava --tap | tap-xunit > reports/test-results.xml"
   },
   "files": [
     "index.js",
@@ -39,22 +42,24 @@
     "methods"
   ],
   "dependencies": {
-    "create-eslint-index": "^1.0.0",
-    "eslint-ast-utils": "^1.0.0",
-    "lodash": "^4.13.1",
-    "req-all": "^0.1.0"
+    "create-eslint-index": "~1.0.0",
+    "eslint-ast-utils": "~1.0.0",
+    "import-modules": "~2.0.0",
+    "lodash": "~4.17.15"
   },
   "devDependencies": {
-    "ava": "^0.17.0",
-    "eslint": "^3.7.1",
-    "eslint-ava-rule-tester": "^0.1.1",
+    "ava": "~2.4.0",
+    "eslint": "~6.8.0",
+    "eslint-ava-rule-tester": "~4.0.0",
     "inject-in-tag": "^1.1.1",
-    "nyc": "^6.4.4",
-    "pify": "^2.3.0",
-    "xo": "^0.17.0"
+    "nyc": "~15.0.0",
+    "pify": "~4.0.1",
+    "rimraf": "^3.0.0",
+    "tap-xunit": "^2.4.1",
+    "xo": "~0.25.3"
   },
   "peerDependencies": {
-    "eslint": ">=3"
+    "eslint": ">=6"
   },
   "xo": {
     "esnext": true,
