@@ -5,18 +5,18 @@
 
 ESLint rules so you and your team use immutable values when you should, and permits mutation when it's safe.
 
+Preventing unsafe mutation of **shared** variables prevents a huge class of bugs from ever appearing.
+
+The plugin's goal is to prevent modification of **shared** variables, such as function parameters or globals whether via assignment, operators, functions or methods. 
+
+Locally declared variables are permitted to use mutation, because in most circumstances this is safe.
+
+See [WHY.](why.md)
+
 ## What's safe?
 Block scoped (`let`) or function scoped variables (`var`) can be reassigned safely. Even objects or arrays marked with `const` can have nested properties changed within the block scope they belong to. The same rules apply for mutating functions (e.g. `Object.assign()` and mutating methods `[].push()`
 
-## What's not safe?
-Mutating variables of **shared** variables is unsafe. This means reassignment outside of the scope they are declared within whether its becuase they are globals, function parameters, or closed over variables can lead to undefined behaviour that is hard to debug and can cause race conditions. Instead of mutating always return a new value.
-
-Preventing unsafe mutation of **shared** variables prevents a huge class of bugs from ever appearing.
-
-## Examples
-
 ```
-// all safe
 function foo() {
   let i = 1; 
   i = 2;
@@ -26,9 +26,12 @@ function foo() {
 }
 
 module.exports = { foo }; // by default commonjs exports are configured to be safe
+```
 
+## What's not safe?
+Mutating variables of **shared** variables is unsafe. This means reassignment outside of the scope they are declared within whether its becuase they are globals, function parameters, or closed over variables can lead to undefined behaviour that is hard to debug and can cause race conditions. Instead of mutating always return a new value.
 
-// all unsafe 
+```
 g = 2 // global reassignment is unsafe
 
 function foo(i) {
@@ -40,15 +43,6 @@ function bar() {
    a = 2; // don't reassign closed over vars
 }
 ```
-
-
-This eslint plugin sets rules for when to use immutable operations and when to permit mutation. 
-
-It aims to prevent **shared** variables, such as function parameters or globals, from ever being modified using operators, assignment or mutating functions or methods. 
-
-Locally declared variables are permitted to use mutation, because in most circumstances this is safe.
-
-See [WHY.](why.md)
 
 ## Install
 
