@@ -8,6 +8,10 @@
 var a = {foo: 1, bar: 2};
 var b = {bar: 3};
 Object.assign(a, b);
+
+Object.defineProperties(object, props);
+Object.defineProperty(object, 'prop', descriptor);
+Object.setPrototypeOf(object, prototype);
 ```
 
 ### Pass

@@ -24,6 +24,37 @@ You can set the options like this:
 }]
 ```
 
+### Pass
+
+```js
+var a = 0;
+let b = 1;
+const c = 2;
+let a = 1; a = 2;
+
+function foo(a={}) {}
+
+/* eslint better-migration/no-mutation: ["error", {"commonjs": true}] */
+exports = {};
+exports.foo = {};
+module.exports = {};
+module.exports.foo = {};
+
+/* eslint better-migration/no-mutation: ["error", {"exceptions": [{"property": "propTypes"}]}] */
+function Component(props) {
+  // ...
+}
+
+Component.propTypes = {
+  // ...
+};
+
+/* eslint better-migration/no-mutation: ["error", {"allowThis": true}] */
+function foo(a) {
+  this.a = a || {};
+}
+```
+
 ### Fail
 
 ```js
@@ -52,34 +83,7 @@ module.exports.foo = {};
 function foo(a) {
   this.a = a || {};
 }
+
+let a = 1; function bar() { a = 2; }
 ```
 
-### Pass
-
-```js
-var a = 0;
-let b = 1;
-const c = 2;
-
-function foo(a={}) {}
-
-/* eslint better-migration/no-mutation: ["error", {"commonjs": true}] */
-exports = {};
-exports.foo = {};
-module.exports = {};
-module.exports.foo = {};
-
-/* eslint better-migration/no-mutation: ["error", {"exceptions": [{"property": "propTypes"}]}] */
-function Component(props) {
-  // ...
-}
-
-Component.propTypes = {
-  // ...
-};
-
-/* eslint better-migration/no-mutation: ["error", {"allowThis": true}] */
-function foo(a) {
-  this.a = a || {};
-}
-```

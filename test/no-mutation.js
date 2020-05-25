@@ -31,7 +31,19 @@ ruleTester.run('no-mutation', rule, {
     'let a = ""; if (false) { a += "b"; }',
     'var b = { x: 1 }; b.x += 1;',
     'for(var i = 0; i < 3; i+=1) {}',
-    // 'let a = c(); a = 1;',
+    'function foo() {const a = {}; if (true) {a.b = "c"}}',
+    'const a = []; a[0] = 2;',
+    'const o = {}; o["name"] = 2;',
+    // 'let a = 2; function() { a += 2; }',
+    {
+      code: '_.reduce((acc, x) => { acc[2] = 1; return acc; }, [], [1,2,3])',
+      options: [{reducers: ["reduce"]}]
+    },
+    {
+      code: 'let array = [1,2,3]; array.reduce((acc, x) => { acc[2] = 1 });',
+      options: [{reducers: ["reduce"]}]
+    },
+    // 'let b = c(); b = 1;', // fix isValidInit by looking at called function's return value
     {
       code: 'exports = {};',
       options: [{commonjs: true}]
@@ -282,6 +294,18 @@ ruleTester.run('no-mutation', rule, {
     },
     {
       code: 'let a = 1; function bar() { a = 2; }',
+      errors: [reassignmentError]
+    },
+    {
+      code: 'a[0] = 2;',
+      errors: [reassignmentError]
+    },
+    {
+      code: 'o["name"] = 2;',
+      errors: [reassignmentError]
+    },
+    {
+      code: '_.reduce((acc, x) => { acc[2] = 1; return acc; }, [], [1,2,3])',
       errors: [reassignmentError]
     }
   ]

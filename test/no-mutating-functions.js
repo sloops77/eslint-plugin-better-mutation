@@ -42,7 +42,17 @@ ruleTester.run('no-mutating-functions', rule, {
     {
       code: 'function fn() {}; Object.assign(fn, b);',
       options: [{functionProps: true}]
-    }
+    },
+    'function fn () {const o = {}; Object.defineProperty(o, "foo")}',
+    {
+      code: 'function fn() {}; Object.defineProperty(fn, "foo");',
+      options: [{functionProps: true}]
+    },
+    {
+      code: 'let array = [1,2,3]; _.reduce((acc, x) => Object.assign(acc, { [x]: x }), {}, array);',
+      options: [{reducers: ["reduce"]}]
+    },
+
   ],
   invalid: [
     {
@@ -110,6 +120,22 @@ ruleTester.run('no-mutating-functions', rule, {
     {
       code: 'function fn(b) { var a = x === 1 ? b : { foo: 1 }; Object.assign(a, c); }',
       errors: [error]
-    }
+    },
+    {
+      code: 'Object.defineProperties(a)',
+      errors: [error]
+    },
+    {
+      code: 'Object.defineProperty(a)',
+      errors: [error]
+    },
+    {
+      code: 'Object.setPrototypeOf(a)',
+      errors: [error]
+    },
+    {
+      code: 'let array = [1,2,3]; _.reduce((acc, x) => Object.assign(acc, { [x]: x }), {}, array);',
+      errors: [error]
+    },
   ]
 });

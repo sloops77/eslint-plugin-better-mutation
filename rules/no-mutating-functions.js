@@ -4,10 +4,14 @@ const _ = require('lodash/fp');
 const {
   isObjectExpression,
   isFunctionExpression,
-  isScopedVariable} = require('./utils/common');
+  isScopedVariable,
+  isExemptedReducer} = require('./utils/common');
 
 const mutatingFunctions = [
   'Object.assign',
+  'Object.defineProperties',
+  'Object.defineProperty',
+  'Object.setPrototypeOf',
   '_.assign',
   '_.assignIn',
   '_.assignInWith',
@@ -67,11 +71,12 @@ const create = function (context) {
   const ignoredMethods = _.getOr([], ['options', 0, 'ignoreMethods'], context);
   const useLodashFunctionImports = _.getOr(false, ['options', 0, 'useLodashFunctionImports'], context);
   const allowFunctionProps = _.getOr(false, ['options', 0, 'functionProps'], context);
+  const exemptedReducerCallees = _.getOr([], ['options', 0, 'reducers'], context);
   const isMutatingFunction = buildIsMutatingFunction(ignoredMethods, useLodashFunctionImports);
 
   return {
     CallExpression(node) {
-      if (isMutatingFunction(node.callee) && !isAllowedFirstArgument(node.arguments[0], node, allowFunctionProps)) {
+      if (isMutatingFunction(node.callee) && !isAllowedFirstArgument(node.arguments[0], node, allowFunctionProps) && !isExemptedReducer(exemptedReducerCallees, node.parent)) {
         context.report({
           node,
           message: 'Unallowed use of mutating functions'
@@ -98,6 +103,10 @@ module.exports = {
         },
         useLodashFunctionImports: {
           type: 'boolean'
+        },
+        reducers: {
+          type: 'array',
+          items: { type: 'string' }
         }
       }
     }],

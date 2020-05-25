@@ -32,10 +32,6 @@ probableArray.splice(0, 1, value);
 probableArray.unshift(value);
 probableArray.unwatch();
 probableArray.watch(fn);
-
-Object.defineProperties(object, props);
-Object.defineProperty(object, 'prop', descriptor);
-Object.setPrototypeOf(object, prototype);
 ```
 
 ### Pass
@@ -43,6 +39,7 @@ Object.setPrototypeOf(object, prototype);
 ```js
 probableArray.foo();
 probableArray.concat(otherArray);
+
 
 Object.keys(object);
 
