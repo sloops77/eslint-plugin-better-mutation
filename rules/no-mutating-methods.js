@@ -31,7 +31,7 @@ function getNameIfPropertyIsLiteral(property) {
 const create = function (context) {
   const options = context.options[0] || {};
   const allowedObjects = options.allowedObjects || [];
-  const exemptedReducerCallees = _.getOr(["reduce"], ['options', 0, 'reducers'], context);
+  const exemptedReducerCallees = _.getOr(['reduce'], ['options', 0, 'reducers'], context);
 
   return {
     CallExpression(node) {
@@ -65,8 +65,8 @@ const schema = [{
     },
     reducers: {
       type: 'array',
-      items: { type: 'string' },
-      default: ["reduce"]
+      items: {type: 'string'},
+      default: ['reduce']
     }
   }
 }];

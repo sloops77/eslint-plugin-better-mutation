@@ -51,7 +51,7 @@ ruleTester.run('no-mutating-methods', rule, {
     'Object.keys(a)',
     'Object.values(a)',
     'var value = []; value.copyWithin(a);',
-    'let array = [1,2,3]; array.reduce((acc, x) => { acc.push(1); return acc; });',
+    'let array = [1,2,3]; array.reduce((acc, x) => { acc.push(1); return acc; });'
   ],
   invalid: [
     {
