@@ -71,7 +71,7 @@ const create = function (context) {
   const ignoredMethods = _.getOr([], ['options', 0, 'ignoreMethods'], context);
   const useLodashFunctionImports = _.getOr(false, ['options', 0, 'useLodashFunctionImports'], context);
   const allowFunctionProps = _.getOr(false, ['options', 0, 'functionProps'], context);
-  const exemptedReducerCallees = _.getOr([], ['options', 0, 'reducers'], context);
+  const exemptedReducerCallees = _.getOr(["reduce"], ['options', 0, 'reducers'], context);
   const isMutatingFunction = buildIsMutatingFunction(ignoredMethods, useLodashFunctionImports);
 
   return {
@@ -106,7 +106,8 @@ module.exports = {
         },
         reducers: {
           type: 'array',
-          items: { type: 'string' }
+          items: { type: 'string' },
+          default: ["reduce"]
         }
       }
     }],

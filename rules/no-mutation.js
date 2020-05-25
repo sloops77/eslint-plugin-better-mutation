@@ -118,7 +118,7 @@ const create = function (context) {
     exemptedIdentifiers.push(_.matches({type: 'MemberExpression', object: {type: 'ThisExpression'}}));
   }
 
-  const exemptedReducerCallees = _.getOr([], ['options', 0, 'reducers'], context);
+  const exemptedReducerCallees = _.getOr(["reduce"], ['options', 0, 'reducers'], context);
 
   return {
     AssignmentExpression(node) {
@@ -185,7 +185,8 @@ const schema = [{
     },
     reducers: {
       type: 'array',
-      items: { type: 'string' }
+      items: { type: 'string' },
+      default: ["reduce"]
     }
   }
 }];

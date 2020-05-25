@@ -35,14 +35,8 @@ ruleTester.run('no-mutation', rule, {
     'const a = []; a[0] = 2;',
     'const o = {}; o["name"] = 2;',
     // 'let a = 2; function() { a += 2; }',
-    {
-      code: '_.reduce((acc, x) => { acc[2] = 1; return acc; }, [], [1,2,3])',
-      options: [{reducers: ["reduce"]}]
-    },
-    {
-      code: 'let array = [1,2,3]; array.reduce((acc, x) => { acc[2] = 1 });',
-      options: [{reducers: ["reduce"]}]
-    },
+    '_.reduce((acc, x) => { acc[2] = 1; return acc; }, [], [1,2,3])',
+    'let array = [1,2,3]; array.reduce((acc, x) => { acc[2] = 1 });',
     // 'let b = c(); b = 1;', // fix isValidInit by looking at called function's return value
     {
       code: 'exports = {};',
@@ -306,6 +300,7 @@ ruleTester.run('no-mutation', rule, {
     },
     {
       code: '_.reduce((acc, x) => { acc[2] = 1; return acc; }, [], [1,2,3])',
+      options: [{reducers: []}],
       errors: [reassignmentError]
     }
   ]

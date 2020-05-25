@@ -48,11 +48,7 @@ ruleTester.run('no-mutating-functions', rule, {
       code: 'function fn() {}; Object.defineProperty(fn, "foo");',
       options: [{functionProps: true}]
     },
-    {
-      code: 'let array = [1,2,3]; _.reduce((acc, x) => Object.assign(acc, { [x]: x }), {}, array);',
-      options: [{reducers: ["reduce"]}]
-    },
-
+    'let array = [1,2,3]; _.reduce((acc, x) => Object.assign(acc, { [x]: x }), {}, array);',
   ],
   invalid: [
     {
@@ -135,6 +131,7 @@ ruleTester.run('no-mutating-functions', rule, {
     },
     {
       code: 'let array = [1,2,3]; _.reduce((acc, x) => Object.assign(acc, { [x]: x }), {}, array);',
+      options: [{reducers: []}],
       errors: [error]
     },
   ]
