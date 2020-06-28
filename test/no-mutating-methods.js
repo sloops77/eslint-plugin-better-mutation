@@ -16,11 +16,6 @@ const methodError = methodName => ({
   message: `The use of method \`${methodName}\` is not allowed as it might be a mutating method`
 });
 
-const objectError = methodName => ({
-  ruleId: 'no-mutating-methods',
-  message: `The use of method \`Object.${methodName}\` is not allowed as it will mutate its arguments`
-});
-
 ruleTester.run('no-mutating-methods', rule, {
   valid: [
     'value.foo()',
@@ -28,6 +23,7 @@ ruleTester.run('no-mutating-methods', rule, {
     'value.concat()',
     'value["foo"](a)',
     '[].push(a)',
+    'function foo() { const a = []; a.push(5); return a; }',
     {
       code: '_.push(a, b)',
       options: [{
@@ -54,7 +50,8 @@ ruleTester.run('no-mutating-methods', rule, {
     },
     'Object.keys(a)',
     'Object.values(a)',
-    'var value = []; value.copyWithin(a);'
+    'var value = []; value.copyWithin(a);',
+    'let array = [1,2,3]; array.reduce((acc, x) => { acc.push(1); return acc; });'
   ],
   invalid: [
     {
@@ -160,16 +157,9 @@ ruleTester.run('no-mutating-methods', rule, {
       errors: [methodError('sort')]
     },
     {
-      code: 'Object.defineProperties(a)',
-      errors: [objectError('defineProperties')]
-    },
-    {
-      code: 'Object.defineProperty(a)',
-      errors: [objectError('defineProperty')]
-    },
-    {
-      code: 'Object.setPrototypeOf(a)',
-      errors: [objectError('setPrototypeOf')]
+      code: 'let array = [1,2,3]; array.reduce((acc, x) => { acc.push(1); return acc; });',
+      options: [{reducers: []}],
+      errors: [methodError('push')]
     }
   ]
 });

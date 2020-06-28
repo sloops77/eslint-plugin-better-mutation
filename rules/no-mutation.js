@@ -1,7 +1,7 @@
 'use strict';
 
 const _ = require('lodash/fp');
-const {isScopedVariable, isScopedFunction} = require('./utils/common');
+const {isScopedVariable, isScopedFunction, isExemptedReducer} = require('./utils/common');
 
 const isModuleExports = _.matches({
   type: 'MemberExpression',
@@ -98,14 +98,14 @@ function makeException(exception) {
   return _.matches(query);
 }
 
-function isExempted(exceptions, node) {
+function isExemptedIdentifier(exemptedIdentifiers, node) {
   if (node.type !== 'MemberExpression') {
     return false;
   }
 
-  const matches = exceptions.some(matcher => matcher(node));
+  const matches = exemptedIdentifiers.some(matcher => matcher(node));
   return matches ||
-    (node.object.type === 'MemberExpression' && isExempted(exceptions, node.object));
+    (node.object.type === 'MemberExpression' && isExemptedIdentifier(exemptedIdentifiers, node.object));
 }
 
 const create = function (context) {
@@ -113,10 +113,12 @@ const create = function (context) {
   const allowFunctionProps = options.functionProps;
   const acceptCommonJs = options.commonjs;
   const acceptPrototypes = options.prototypes;
-  const exceptions = _.map(makeException, options.exceptions);
+  const exemptedIdentifiers = _.map(makeException, options.exceptions);
   if (options.allowThis) {
-    exceptions.push(_.matches({type: 'MemberExpression', object: {type: 'ThisExpression'}}));
+    exemptedIdentifiers.push(_.matches({type: 'MemberExpression', object: {type: 'ThisExpression'}}));
   }
+
+  const exemptedReducerCallees = _.getOr(['reduce'], ['options', 0, 'reducers'], context);
 
   return {
     AssignmentExpression(node) {
@@ -125,8 +127,9 @@ const create = function (context) {
 
       if ((isCommonJs && acceptCommonJs) ||
         (isPrototypeAss && acceptPrototypes) ||
-        isExempted(exceptions, node.left) ||
-        isScopedVariable(node.left, node.parent, allowFunctionProps)) {
+        isExemptedIdentifier(exemptedIdentifiers, node.left) ||
+        isScopedVariable(node.left, node.parent, allowFunctionProps) ||
+        isExemptedReducer(exemptedReducerCallees, node.parent)) {
         return;
       }
 
@@ -179,6 +182,11 @@ const schema = [{
           }
         }
       }
+    },
+    reducers: {
+      type: 'array',
+      items: {type: 'string'},
+      default: ['reduce']
     }
   }
 }];

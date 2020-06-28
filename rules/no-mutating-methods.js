@@ -1,6 +1,7 @@
 'use strict';
 
-const {isObjectExpression, isScopedVariable} = require('./utils/common');
+const _ = require('lodash/fp');
+const {isObjectExpression, isScopedVariable, isExemptedReducer} = require('./utils/common');
 
 const mutatingMethods = [
   'copyWithin',
@@ -13,12 +14,6 @@ const mutatingMethods = [
   'unshift',
   'unwatch',
   'watch'
-];
-
-const mutatingObjectMethods = [
-  'defineProperties',
-  'defineProperty',
-  'setPrototypeOf'
 ];
 
 function getNameIfPropertyIsIdentifier(property) {
@@ -36,6 +31,7 @@ function getNameIfPropertyIsLiteral(property) {
 const create = function (context) {
   const options = context.options[0] || {};
   const allowedObjects = options.allowedObjects || [];
+  const exemptedReducerCallees = _.getOr(['reduce'], ['options', 0, 'reducers'], context);
 
   return {
     CallExpression(node) {
@@ -47,19 +43,8 @@ const create = function (context) {
         return;
       }
 
-      if (node.callee.object.name === 'Object') {
-        if (mutatingObjectMethods.includes(node.callee.property.name)) {
-          context.report({
-            node,
-            message: `The use of method \`Object.${node.callee.property.name}\` is not allowed as it will mutate its arguments`
-          });
-        }
-
-        return;
-      }
-
       const name = getNameIfPropertyIsIdentifier(node.callee.property) || getNameIfPropertyIsLiteral(node.callee.property);
-      if (name && !isScopedVariable(node.callee.object, node.parent) && !isObjectExpression(node.callee.object)) {
+      if (name && !isScopedVariable(node.callee.object, node.parent) && !isObjectExpression(node.callee.object) && !isExemptedReducer(exemptedReducerCallees, node.parent)) {
         context.report({
           node,
           message: `The use of method \`${name}\` is not allowed as it might be a mutating method`
@@ -77,6 +62,11 @@ const schema = [{
       items: {
         type: 'string'
       }
+    },
+    reducers: {
+      type: 'array',
+      items: {type: 'string'},
+      default: ['reduce']
     }
   }
 }];

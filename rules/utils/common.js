@@ -40,6 +40,14 @@ const isEndOfBlock = _.flow(
   _.includes(_, ['Program', 'FunctionDeclaration', 'ClassDeclaration', 'FunctionExpression', 'ArrowFunctionExpression'])
 );
 
+function getBlockAncestor(node) {
+  if (isEndOfBlock(node)) {
+    return node;
+  }
+
+  return getBlockAncestor(node.parent);
+}
+
 function isFunctionDeclaration(identifier) {
   return _.overEvery([isClassOrFunctionDeclaration, _.matches({id: {name: identifier}})]);
 }
@@ -72,7 +80,7 @@ function getReference(node) {
 function isValidInit(rhsExpression, node) {
   return isObjectExpression(rhsExpression) ||
     isLiteralExpression(rhsExpression) ||
-    // Fix 'let a = c(); a = 1;' by ensuring that function c() { return  {} };
+    // TODO Fix 'let a = c(); a = 1;' by ensuring that function c() { return  {} };
     // isCallExpression(rhsExpression) /* && called Function always returns a ValidInit */ ||
     (isReference(rhsExpression) && isScopedVariable(getReference(rhsExpression), node.parent)) ||
     (isConditionalExpression(rhsExpression) && isValidInit(rhsExpression.alternate, node) && isValidInit(rhsExpression.consequent, node));
@@ -130,13 +138,19 @@ function isScopedFunction(arg, node) {
   return isScopedFunctionIdentifier(identifier, node);
 }
 
+function isExemptedReducer(exemptedReducerCallees, node) {
+  const endOfBlockNode = getBlockAncestor(node);
+  const callee = _.get('parent.callee', endOfBlockNode);
+  return callee && _.includes(_.get('property.name', callee), exemptedReducerCallees);
+}
+
 module.exports = {
   isReference,
-  getReference,
   isObjectExpression,
   isLiteralExpression,
   isFunctionExpression,
   isConditionalExpression,
   isScopedVariable,
-  isScopedFunction
+  isScopedFunction,
+  isExemptedReducer
 };
