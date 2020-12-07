@@ -33,7 +33,7 @@ the loop that the reducer executes limits the scope of the accumulator to the re
 
 ``` 
 function sum(numbers) {
-  numbers.reduce((acc, val) => {
+  return numbers.reduce((acc, val) => {
     acc += val;  // this is safe!
     return acc;    
   }, 0);
