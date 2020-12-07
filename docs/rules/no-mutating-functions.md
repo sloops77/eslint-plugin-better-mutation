@@ -2,6 +2,12 @@
 
 [`Object.assign()`] is a method that mutates its first argument. In order to use this method as a non-mutating method, the first element may not be a variable (even if declared using `const`), and should therefore be a static value, such as an object expression.
 
+## Options
+
+This rule supports the following options:
+
+`reducers`: An array of method names that are reducer's that are exempt from use function modification.
+
 ### Fail
 
 ```js

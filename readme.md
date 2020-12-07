@@ -26,10 +26,23 @@ function foo() {
 }
 
 module.exports = { foo }; // by default commonjs exports are configured to be safe
-```
+``` 
+
+Also modification of parameters within reducer functions/methods is safe. The parameters of a reducer a safe because 
+the loop that the reducer executes limits the scope of the accumulator to the reducer function. 
+
+``` 
+function sum(numbers) {
+  numbers.reduce((acc, val) => {
+    acc += val;  // this is safe!
+    return acc;    
+  }, 0);
+}
+
+``` 
 
 ## What's not safe?
-Mutating variables of **shared** variables is unsafe. This means reassignment outside of the scope they are declared within whether its becuase they are globals, function parameters, or closed over variables can lead to undefined behaviour that is hard to debug and can cause race conditions. Instead of mutating always return a new value.
+Mutating variables of **shared** variables is unsafe. This means reassignment outside of the scope they are declared within whether its because they are globals, function parameters, or closed over variables can lead to undefined behaviour that is hard to debug and can cause race conditions. Instead of mutating always return a new value.
 
 ```
 g = 2 // global reassignment is unsafe

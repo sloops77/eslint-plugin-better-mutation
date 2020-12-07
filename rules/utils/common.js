@@ -141,7 +141,7 @@ function isScopedFunction(arg, node) {
 function isExemptedReducer(exemptedReducerCallees, node) {
   const endOfBlockNode = getBlockAncestor(node);
   const callee = _.get('parent.callee', endOfBlockNode);
-  return callee && _.includes(_.get('property.name', callee), exemptedReducerCallees);
+  return callee && _.includes(_.getOr(_.get('name', callee), 'property.name', callee), exemptedReducerCallees);
 }
 
 module.exports = {

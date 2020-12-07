@@ -36,6 +36,7 @@ ruleTester.run('no-mutation', rule, {
     'const o = {}; o["name"] = 2;',
     // 'let a = 2; function() { a += 2; }',
     '_.reduce((acc, x) => { acc[2] = 1; return acc; }, [], [1,2,3])',
+    '[1,2,3].reduce((acc, x) => { acc += x; return acc; }, 0)',
     'let array = [1,2,3]; array.reduce((acc, x) => { acc[2] = 1 });',
     // 'let b = c(); b = 1;', // fix isValidInit by looking at called function's return value
     {
