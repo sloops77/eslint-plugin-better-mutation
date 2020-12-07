@@ -87,12 +87,12 @@ function isValidInit(rhsExpression, node) {
 }
 
 function getLeftMostObject(arg) {
-  const obj = _.get('object')(arg);
-  if (!obj) {
+  const object = _.get('object')(arg);
+  if (!object) {
     return arg;
   }
 
-  return getLeftMostObject(obj);
+  return getLeftMostObject(object);
 }
 
 function isVariableDeclaration(identifier) {

@@ -12,7 +12,6 @@ const ruleTester = avaRuleTester(test, {
 });
 
 const error = {
-  ruleId: 'no-mutating-functions',
   message: 'Unallowed use of mutating functions'
 };
 

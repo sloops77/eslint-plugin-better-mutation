@@ -43,20 +43,21 @@
   ],
   "dependencies": {
     "create-eslint-index": "~1.0.0",
-    "eslint-ast-utils": "~1.0.0",
+    "eslint-ast-utils": "~1.1.0",
     "import-modules": "~2.0.0",
-    "lodash": "~4.17.15"
+    "lodash": "~4.17.20"
   },
   "devDependencies": {
-    "ava": "~2.4.0",
-    "eslint": "~6.8.0",
+    "@ava/babel": "^1.0.1",
+    "ava": "~3.14.0",
+    "eslint": "~7.15.0",
     "eslint-ava-rule-tester": "~4.0.0",
-    "inject-in-tag": "^1.1.1",
-    "nyc": "~15.0.0",
-    "pify": "~4.0.1",
-    "rimraf": "^3.0.0",
-    "tap-xunit": "^2.4.1",
-    "xo": "~0.25.3"
+    "inject-in-tag": "~1.1.1",
+    "nyc": "~15.1.0",
+    "pify": "~5.0.0",
+    "rimraf": "~3.0.2",
+    "tap-xunit": "~2.4.1",
+    "xo": "~0.35.0"
   },
   "peerDependencies": {
     "eslint": ">=6"
@@ -64,5 +65,8 @@
   "xo": {
     "esnext": true,
     "space": 2
+  },
+  "ava": {
+    "babel": true
   }
 }

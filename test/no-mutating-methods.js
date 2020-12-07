@@ -12,7 +12,6 @@ const ruleTester = avaRuleTester(test, {
 });
 
 const methodError = methodName => ({
-  ruleId: 'no-mutating-methods',
   message: `The use of method \`${methodName}\` is not allowed as it might be a mutating method`
 });
 

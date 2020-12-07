@@ -3,7 +3,7 @@
 const _ = require('lodash/fp');
 const {isObjectExpression, isScopedVariable, isExemptedReducer} = require('./utils/common');
 
-const mutatingMethods = [
+const mutatingMethods = new Set([
   'copyWithin',
   'pop',
   'push',
@@ -14,17 +14,17 @@ const mutatingMethods = [
   'unshift',
   'unwatch',
   'watch'
-];
+]);
 
 function getNameIfPropertyIsIdentifier(property) {
   return property.type === 'Identifier' &&
-    mutatingMethods.includes(property.name) &&
+    mutatingMethods.has(property.name) &&
     property.name;
 }
 
 function getNameIfPropertyIsLiteral(property) {
   return property.type === 'Literal' &&
-    mutatingMethods.includes(property.value) &&
+    mutatingMethods.has(property.value) &&
     property.value;
 }
 
