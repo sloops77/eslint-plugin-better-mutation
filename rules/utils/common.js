@@ -106,6 +106,16 @@ function isVariableDeclaration(identifier) {
   };
 }
 
+
+function isLetDeclaration(identifier) {
+  return function (node) { // Todo not sure about this defaulting. seems to fix weird bug
+    // todo support multiple declarations
+    const finalNode = node || {};
+    const declaration = _.get('declarations[0]', finalNode);
+    return finalNode.type === 'VariableDeclaration' && _.isMatch({type: 'VariableDeclarator', id: {name: identifier}}, declaration) && finalNode.kind === 'let';
+  };
+}
+
 function isScopedVariableIdentifier(identifier, node, allowFunctionProps) {
   if (_.isNil(node)) {
     return false;
@@ -115,6 +125,22 @@ function isScopedVariableIdentifier(identifier, node, allowFunctionProps) {
     (allowFunctionProps && isScopedFunctionIdentifier(identifier, node)) ||
     isForStatementVariable(identifier, node) ||
     (!isEndOfBlock(node) && isScopedVariableIdentifier(identifier, node.parent));
+}
+
+function isScopedLetIdentifier(identifier, node) {
+  if (_.isNil(node)) {
+    return false;
+  }
+  return _.some(isLetDeclaration(identifier))(node.body) ||
+    (!isEndOfBlock(node) && isScopedLetIdentifier(identifier, node.parent));
+}
+
+function isScopedLetVariableAssignment(node) {
+  if (_.get('operator', node) !== '=') {
+    return false;
+  }
+  const identifier = _.get('name')(getLeftMostObject(node.left));
+  return isScopedLetIdentifier(identifier, node.parent);
 }
 
 function isScopedVariable(arg, node, allowFunctionProps) {
@@ -151,6 +177,7 @@ module.exports = {
   isFunctionExpression,
   isConditionalExpression,
   isScopedVariable,
+  isScopedLetVariableAssignment,
   isScopedFunction,
   isExemptedReducer
 };

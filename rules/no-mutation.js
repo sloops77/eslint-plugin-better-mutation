@@ -1,7 +1,7 @@
 'use strict';
 
 const _ = require('lodash/fp');
-const {isScopedVariable, isScopedFunction, isExemptedReducer} = require('./utils/common');
+const {isScopedVariable, isScopedFunction, isExemptedReducer,isScopedLetVariableAssignment} = require('./utils/common');
 
 const isModuleExports = _.matches({
   type: 'MemberExpression',
@@ -128,6 +128,7 @@ const create = function (context) {
       if ((isCommonJs && acceptCommonJs) ||
         (isPrototypeAss && acceptPrototypes) ||
         isExemptedIdentifier(exemptedIdentifiers, node.left) ||
+        isScopedLetVariableAssignment(node) ||
         isScopedVariable(node.left, node.parent, allowFunctionProps) ||
         isExemptedReducer(exemptedReducerCallees, node.parent)) {
         return;
