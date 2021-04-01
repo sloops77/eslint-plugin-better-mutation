@@ -109,10 +109,15 @@ function isVariableDeclaration(identifier) {
 
 function isLetDeclaration(identifier) {
   return function (node) { // Todo not sure about this defaulting. seems to fix weird bug
-    // todo support multiple declarations
     const finalNode = node || {};
-    const declaration = _.get('declarations[0]', finalNode);
-    return finalNode.type === 'VariableDeclaration' && _.isMatch({type: 'VariableDeclarator', id: {name: identifier}}, declaration) && finalNode.kind === 'let';
+    const declarations = _.get('declarations', finalNode) || [];
+    const declaration = declarations.find(n => n.id.name === identifier);
+    return (
+      declaration &&
+      finalNode.type === 'VariableDeclaration' &&
+      _.isMatch({type: 'VariableDeclarator', id: {name: identifier}}, declaration) &&
+      finalNode.kind === 'let'
+    );
   };
 }
 
