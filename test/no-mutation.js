@@ -28,6 +28,7 @@ ruleTester.run('no-mutation', rule, {
     'function foo(a={}) {}',
     'let a = 1; a = 2;',
     'let a = ""; if (false) { a = "b"; }',
+    'let a, b; b = 2;',
     'let a = ""; if (false) { a += "b"; }',
     'let {blah: a, b} = {}; if (!a) { a = 1; }',
     'var b = { x: 1 }; b.x += 1;',

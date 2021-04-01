@@ -96,14 +96,35 @@ function getLeftMostObject(arg) {
   return getLeftMostObject(object);
 }
 
+function getDeclaration(identifier, node) {
+  const declarations = _.get('declarations', node) || [];
+  return declarations.find(n => {
+    const id = _.get('id', n);
+    if (_.get('type', id) === 'ObjectPattern') {
+      const destructuredProperties = _.get('properties', id) || [];
+      return destructuredProperties.find(p => {
+        return _.get('value.name', p) === identifier;
+      });
+    }
+    else {
+      return _.get('name', id) === identifier;
+    }
+  });
+}
+
 function isVariableDeclaration(identifier) {
   return function (node) { // Todo not sure about this defaulting. seems to fix weird bug
-    // todo support multiple declarations
     const finalNode = node || {};
-    const declaration = _.get('declarations[0]', finalNode);
-    return finalNode.type === 'VariableDeclaration' &&
+
+    if (finalNode.type !== 'VariableDeclaration') {
+      return false;
+    }
+
+    const declaration = getDeclaration(identifier, finalNode);
+    return (
       _.isMatch({type: 'VariableDeclarator', id: {name: identifier}}, declaration) &&
-      isValidInit(_.get('init', declaration), finalNode);
+      isValidInit(_.get('init', declaration), finalNode)
+    );
   };
 }
 
@@ -118,11 +139,18 @@ function isIdentifierDeclared(identifier, idNode) {
 
 function isLetDeclaration(identifier) {
   return function (node) { // Todo not sure about this defaulting. seems to fix weird bug
-    // todo support multiple declarations
     const finalNode = node || {};
-    const declaration = _.get('declarations[0]', finalNode);
-    debug('%j', {f: 'isLetDeclaration', declaration, nodeType: finalNode?.type, nodeKind: finalNode?.kind, idNode: declaration?.id, idNodeProps: declaration?.id?.properties});
-    return finalNode.type === 'VariableDeclaration' && _.isMatch({type: 'VariableDeclarator'}, declaration) && isIdentifierDeclared(identifier, declaration?.id) && finalNode.kind === 'let';
+
+    if (finalNode.type !== 'VariableDeclaration' || finalNode.kind !== 'let') {
+      return false;
+    }
+
+    const declaration = getDeclaration(identifier, finalNode);
+    // debug('%j', {f: 'isLetDeclaration', declaration, nodeType: finalNode?.type, nodeKind: finalNode?.kind, idNode: declaration?.id, idNodeProps: declaration?.id?.properties});
+    return (
+      _.isMatch({type: 'VariableDeclarator'}, declaration) &&
+      isIdentifierDeclared(identifier, declaration?.id)
+    );
   };
 }
 
