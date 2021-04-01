@@ -41,6 +41,24 @@ ruleTester.run('no-mutation', rule, {
     '[1,2,3].reduce((acc, x) => { acc += x; return acc; }, 0)',
     'let array = [1,2,3]; array.reduce((acc, x) => { acc[2] = 1 });',
     // 'let b = c(); b = 1;', // fix isValidInit by looking at called function's return value
+    `
+    function foo() {
+      let a = 2;
+      [1, 2].forEach(function(x) {
+        a = a + x;
+      });
+      return a;
+    }
+    `,
+    `
+    function foo() {
+      let a = 2;
+      [1, 2].forEach(x => {
+        a = a + x;
+      });
+      return a;
+    }
+    `,
     {
       code: 'exports = {};',
       options: [{commonjs: true}]
@@ -143,6 +161,36 @@ ruleTester.run('no-mutation', rule, {
     }
   ],
   invalid: [
+    {
+      code: `
+        function doMutation(a) {
+          [1, 2].forEach(function(x) {
+            a = a + x;
+          });
+          return a;
+        }
+        function foo() {
+          let a = 2;
+          doMutation(a);
+        }
+      `,
+      errors: [reassignmentError]
+    },
+    {
+      code: `
+        function doMutation(a) {
+          [1, 2].forEach(x => {
+            a = a + x;
+          });
+          return a;
+        }
+        function foo() {
+          let a = 2;
+          doMutation(a);
+        }
+      `,
+      errors: [reassignmentError]
+    },
     {
       code: 'class Clazz {}; Clazz.staticFoo = 3',
       errors: [reassignmentError]
