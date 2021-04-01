@@ -35,6 +35,11 @@ const isClassOrFunctionDeclaration = _.flow(
   _.includes(_, ['ClassDeclaration', 'FunctionDeclaration'])
 );
 
+const isEndOfVariableScope = _.flow(
+  _.property('type'),
+  _.includes(_, ['Program', 'FunctionDeclaration', 'ClassDeclaration'])
+);
+
 const isEndOfBlock = _.flow(
   _.property('type'),
   _.includes(_, ['Program', 'FunctionDeclaration', 'ClassDeclaration', 'FunctionExpression', 'ArrowFunctionExpression'])
@@ -137,7 +142,7 @@ function isScopedLetIdentifier(identifier, node) {
     return false;
   }
   return _.some(isLetDeclaration(identifier))(node.body) ||
-    (!isEndOfBlock(node) && isScopedLetIdentifier(identifier, node.parent));
+    (!isEndOfVariableScope(node) && isScopedLetIdentifier(identifier, node.parent));
 }
 
 function isScopedLetVariableAssignment(node) {
