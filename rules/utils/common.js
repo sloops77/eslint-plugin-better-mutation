@@ -1,5 +1,8 @@
 const _ = require('lodash/fp');
 
+// TypeScript AST
+const TS_AS_EXPRESSION = 'TSAsExpression';
+
 const isReference = _.flow(
   _.property('type'),
   _.includes(_, ['MemberExpression', 'Identifier'])
@@ -44,6 +47,13 @@ const isEndOfBlock = _.flow(
   _.property('type'),
   _.includes(_, ['Program', 'FunctionDeclaration', 'ClassDeclaration', 'FunctionExpression', 'ArrowFunctionExpression'])
 );
+
+function getIdentifier(node) {
+  const namePath = _.get('type')(node) === TS_AS_EXPRESSION
+    ? 'expression.name'
+    : 'name';
+  return _.get(namePath)(node);
+}
 
 function getBlockAncestor(node) {
   if (isEndOfBlock(node)) {
@@ -149,12 +159,12 @@ function isScopedLetVariableAssignment(node) {
   if (_.get('operator', node) !== '=') {
     return false;
   }
-  const identifier = _.get('name')(getLeftMostObject(node.left));
+  const identifier = getIdentifier(getLeftMostObject(node.left));
   return isScopedLetIdentifier(identifier, node.parent);
 }
 
 function isScopedVariable(arg, node, allowFunctionProps) {
-  const identifier = _.get('name')(getLeftMostObject(arg));
+  const identifier = getIdentifier(getLeftMostObject(arg));
   return isScopedVariableIdentifier(identifier, node, allowFunctionProps);
 }
 
@@ -170,7 +180,7 @@ function isScopedFunctionIdentifier(identifier, node) {
 }
 
 function isScopedFunction(arg, node) {
-  const identifier = _.get('name')(getLeftMostObject(arg));
+  const identifier = getIdentifier(getLeftMostObject(arg));
   return isScopedFunctionIdentifier(identifier, node);
 }
 

@@ -60,6 +60,33 @@ ruleTester.run('no-mutation', rule, {
       return a;
     }
     `,
+    // TODO - add typescript support to test this
+    // `
+    // export type Foo = {
+    //   a: number;
+    // };
+    
+    // export type Bar = {
+    //   a: number;
+    //   b: number;
+    // };
+    
+    // function isBar(x: unknown): x is Bar {
+    //   return !!x;
+    // }
+    
+    // export function doStuff(o: Foo): Foo {
+    //   let x = {
+    //     ...o,
+    //   };
+    
+    //   if (isBar(x)) {
+    //     (x as Bar).b = 2;
+    //   }
+    
+    //   return x;
+    // }    
+    // `,
     {
       code: 'exports = {};',
       options: [{commonjs: true}]
