@@ -106,13 +106,23 @@ function isVariableDeclaration(identifier) {
   };
 }
 
+function isIdentifierDeclared(identifier, idNode) {
+  return idNode != null && (
+    // regular declaration: let a = ...
+    _.isMatch({name: identifier}, idNode) ||
+    // destructuring declaration: let { a } = ...
+    _.some({value: {name: identifier}}, idNode.properties)
+  )
+}
+
 
 function isLetDeclaration(identifier) {
   return function (node) { // Todo not sure about this defaulting. seems to fix weird bug
     // todo support multiple declarations
     const finalNode = node || {};
     const declaration = _.get('declarations[0]', finalNode);
-    return finalNode.type === 'VariableDeclaration' && _.isMatch({type: 'VariableDeclarator', id: {name: identifier}}, declaration) && finalNode.kind === 'let';
+    // console.dir({f: 'isLetDeclaration', declaration, nodeType: finalNode.type, nodeKind: finalNode.kind, idNode: declaration?.id, idNodeProps: declaration?.id?.properties[0]})
+    return finalNode.type === 'VariableDeclaration' && _.isMatch({type: 'VariableDeclarator'}, declaration) && isIdentifierDeclared(identifier, declaration?.id) && finalNode.kind === 'let';
   };
 }
 
@@ -131,6 +141,7 @@ function isScopedLetIdentifier(identifier, node) {
   if (_.isNil(node)) {
     return false;
   }
+  // console.dir({f: 'isScopedLetIdentifier', identifier, nodeBody: node.body});
   return _.some(isLetDeclaration(identifier))(node.body) ||
     (!isEndOfBlock(node) && isScopedLetIdentifier(identifier, node.parent));
 }
@@ -139,11 +150,13 @@ function isScopedLetVariableAssignment(node) {
   if (_.get('operator', node) !== '=') {
     return false;
   }
+  // console.dir({f: 'isScopedLetVariableAssignment', left: node.left})
   const identifier = _.get('name')(getLeftMostObject(node.left));
   return isScopedLetIdentifier(identifier, node.parent);
 }
 
 function isScopedVariable(arg, node, allowFunctionProps) {
+  // console.dir({ f: 'isScopedVariable', arg })
   const identifier = _.get('name')(getLeftMostObject(arg));
   return isScopedVariableIdentifier(identifier, node, allowFunctionProps);
 }
