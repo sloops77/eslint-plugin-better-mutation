@@ -121,7 +121,7 @@ function isLetDeclaration(identifier) {
     // todo support multiple declarations
     const finalNode = node || {};
     const declaration = _.get('declarations[0]', finalNode);
-    debug('%j', {f: 'isLetDeclaration', declaration, nodeType: finalNode.type, nodeKind: finalNode.kind, idNode: declaration?.id, idNodeProps: declaration?.id?.properties[0]});
+    debug('%j', {f: 'isLetDeclaration', declaration, nodeType: finalNode?.type, nodeKind: finalNode?.kind, idNode: declaration?.id, idNodeProps: declaration?.id?.properties});
     return finalNode.type === 'VariableDeclaration' && _.isMatch({type: 'VariableDeclarator'}, declaration) && isIdentifierDeclared(identifier, declaration?.id) && finalNode.kind === 'let';
   };
 }
@@ -142,7 +142,7 @@ function isScopedLetIdentifier(identifier, node) {
     return false;
   }
 
-  debug('%j', {f: 'isScopedLetIdentifier', identifier, nodeBody: node.body});
+  // debug('%j', {f: 'isScopedLetIdentifier', identifier, nodeBody: node.body});
 
   return _.some(isLetDeclaration(identifier))(node.body) ||
     (!isEndOfBlock(node) && isScopedLetIdentifier(identifier, node.parent));
@@ -153,14 +153,14 @@ function isScopedLetVariableAssignment(node) {
     return false;
   }
 
-  debug('%j', {f: 'isScopedLetVariableAssignment', left: node.left});
+  // debug('%j', {f: 'isScopedLetVariableAssignment', left: node.left});
 
   const identifier = _.get('name')(getLeftMostObject(node.left));
   return isScopedLetIdentifier(identifier, node.parent);
 }
 
 function isScopedVariable(arg, node, allowFunctionProps) {
-  debug('%j', {f: 'isScopedVariable', arg});
+  // debug('%j', {f: 'isScopedVariable', arg});
 
   const identifier = _.get('name')(getLeftMostObject(arg));
   return isScopedVariableIdentifier(identifier, node, allowFunctionProps);
