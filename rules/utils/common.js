@@ -142,7 +142,7 @@ function isScopedLetIdentifier(identifier, node) {
     return false;
   }
 
-  // debug('%j', {f: 'isScopedLetIdentifier', identifier, nodeBody: node.body});
+  // Debug('%j', {f: 'isScopedLetIdentifier', identifier, nodeBody: node.body});
 
   return _.some(isLetDeclaration(identifier))(node.body) ||
     (!isEndOfBlock(node) && isScopedLetIdentifier(identifier, node.parent));
@@ -153,14 +153,14 @@ function isScopedLetVariableAssignment(node) {
     return false;
   }
 
-  // debug('%j', {f: 'isScopedLetVariableAssignment', left: node.left});
+  // Debug('%j', {f: 'isScopedLetVariableAssignment', left: node.left});
 
   const identifier = _.get('name')(getLeftMostObject(node.left));
   return isScopedLetIdentifier(identifier, node.parent);
 }
 
 function isScopedVariable(arg, node, allowFunctionProps) {
-  // debug('%j', {f: 'isScopedVariable', arg});
+  // Debug('%j', {f: 'isScopedVariable', arg});
 
   const identifier = _.get('name')(getLeftMostObject(arg));
   return isScopedVariableIdentifier(identifier, node, allowFunctionProps);
