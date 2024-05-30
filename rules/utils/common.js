@@ -1,5 +1,5 @@
 const _ = require('lodash/fp');
-const debug = require('debug')('eslint-better-mutation');
+// Const debug = require('debug')('eslint-better-mutation');
 
 const isReference = _.flow(
   _.property('type'),
@@ -106,9 +106,8 @@ function getDeclaration(identifier, node) {
         return _.get('value.name', p) === identifier;
       });
     }
-    else {
-      return _.get('name', id) === identifier;
-    }
+
+    return _.get('name', id) === identifier;
   });
 }
 
@@ -146,7 +145,7 @@ function isLetDeclaration(identifier) {
     }
 
     const declaration = getDeclaration(identifier, finalNode);
-    // debug('%j', {f: 'isLetDeclaration', declaration, nodeType: finalNode?.type, nodeKind: finalNode?.kind, idNode: declaration?.id, idNodeProps: declaration?.id?.properties});
+    // Debug('%j', {f: 'isLetDeclaration', declaration, nodeType: finalNode?.type, nodeKind: finalNode?.kind, idNode: declaration?.id, idNodeProps: declaration?.id?.properties});
     return (
       _.isMatch({type: 'VariableDeclarator'}, declaration) &&
       isIdentifierDeclared(identifier, declaration?.id)
@@ -170,7 +169,7 @@ function isScopedLetIdentifier(identifier, node) {
     return false;
   }
 
-  // debug('%j', {f: 'isScopedLetIdentifier', identifier, nodeBody: node.body});
+  // Debug('%j', {f: 'isScopedLetIdentifier', identifier, nodeBody: node.body});
 
   return _.some(isLetDeclaration(identifier))(node.body) ||
     (!isEndOfBlock(node) && isScopedLetIdentifier(identifier, node.parent));
@@ -181,14 +180,14 @@ function isScopedLetVariableAssignment(node) {
     return false;
   }
 
-  // debug('%j', {f: 'isScopedLetVariableAssignment', left: node.left});
+  // Debug('%j', {f: 'isScopedLetVariableAssignment', left: node.left});
 
   const identifier = _.get('name')(getLeftMostObject(node.left));
   return isScopedLetIdentifier(identifier, node.parent);
 }
 
 function isScopedVariable(arg, node, allowFunctionProps) {
-  // debug('%j', {f: 'isScopedVariable', arg});
+  // Debug('%j', {f: 'isScopedVariable', arg});
 
   const identifier = _.get('name')(getLeftMostObject(arg));
   return isScopedVariableIdentifier(identifier, node, allowFunctionProps);
