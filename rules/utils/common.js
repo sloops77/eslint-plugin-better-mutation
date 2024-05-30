@@ -1,5 +1,5 @@
 const _ = require('lodash/fp');
-// Const debug = require('debug')('eslint-better-mutation');
+const debug = require('debug')('eslint-better-mutation');
 
 const isReference = _.flow(
   _.property('type'),
@@ -79,6 +79,12 @@ function getReference(node) {
 }
 
 function isValidInit(rhsExpression, node) {
+  debug('%j', {
+    isObjectExpression: isObjectExpression(rhsExpression),
+    isLiteralExpression: isLiteralExpression(rhsExpression),
+    isScopedVariableRef: (isReference(rhsExpression) && isScopedVariable(getReference(rhsExpression), node.parent)),
+    isConditionalExpressionInit: isConditionalExpression(rhsExpression) && isValidInit(rhsExpression.alternate, node) && isValidInit(rhsExpression.consequent, node)
+  });
   return isObjectExpression(rhsExpression) ||
     isLiteralExpression(rhsExpression) ||
     // TODO Fix 'let a = c(); a = 1;' by ensuring that function c() { return  {} };
@@ -96,15 +102,22 @@ function getLeftMostObject(arg) {
   return getLeftMostObject(object);
 }
 
-function getDeclaration(identifier, node) {
+function getIdentifierDeclaration(identifier, node) {
   const declarations = _.get('declarations', node) || [];
   return declarations.find(n => {
+    if (n.type !== 'VariableDeclarator') {
+      return false;
+    }
+
     const id = _.get('id', n);
     if (_.get('type', id) === 'ObjectPattern') {
       const destructuredProperties = _.get('properties', id) || [];
-      return destructuredProperties.find(p => {
-        return _.get('value.name', p) === identifier;
-      });
+      return _.find({value: {name: identifier}}, destructuredProperties);
+    }
+
+    if (_.get('type', id) === 'ArrayPattern') {
+      const destructuredElements = _.get('elements', id) || [];
+      return _.find({name: identifier}, destructuredElements);
     }
 
     return _.get('name', id) === identifier;
@@ -119,21 +132,18 @@ function isVariableDeclaration(identifier) {
       return false;
     }
 
-    const declaration = getDeclaration(identifier, finalNode);
+    const declaration = getIdentifierDeclaration(identifier, finalNode);
+    debug('%j', {
+      f: 'isVariableDeclaration',
+      nodeType: finalNode.type,
+      declarationType: declaration?.type,
+      isValidInit: isValidInit(_.get('init', declaration), finalNode)
+    });
     return (
-      _.isMatch({type: 'VariableDeclarator', id: {name: identifier}}, declaration) &&
+      !_.isNil(declaration) &&
       isValidInit(_.get('init', declaration), finalNode)
     );
   };
-}
-
-function isIdentifierDeclared(identifier, idNode) {
-  return !_.isNil(idNode) && (
-    // Regular declaration: let a = ...
-    _.isMatch({name: identifier}, idNode) ||
-    // Destructuring declaration: let { a } = ...
-    _.some({value: {name: identifier}}, idNode.properties)
-  );
 }
 
 function isLetDeclaration(identifier) {
@@ -141,15 +151,19 @@ function isLetDeclaration(identifier) {
     const finalNode = node || {};
 
     if (finalNode.type !== 'VariableDeclaration' || finalNode.kind !== 'let') {
+      debug('%j', {f: 'isLetDeclaration', isLetNode: false});
       return false;
     }
 
-    const declaration = getDeclaration(identifier, finalNode);
-    // Debug('%j', {f: 'isLetDeclaration', declaration, nodeType: finalNode?.type, nodeKind: finalNode?.kind, idNode: declaration?.id, idNodeProps: declaration?.id?.properties});
-    return (
-      _.isMatch({type: 'VariableDeclarator'}, declaration) &&
-      isIdentifierDeclared(identifier, declaration?.id)
-    );
+    const declaration = getIdentifierDeclaration(identifier, finalNode);
+    debug('%j', {
+      f: 'isLetDeclaration',
+      isLetNode: true,
+      nodeType: finalNode?.type,
+      nodeKind: finalNode?.kind,
+      declarationType: declaration?.type
+    });
+    return !_.isNil(declaration);
   };
 }
 
@@ -169,8 +183,13 @@ function isScopedLetIdentifier(identifier, node) {
     return false;
   }
 
-  // Debug('%j', {f: 'isScopedLetIdentifier', identifier, nodeBody: node.body});
-
+  debug('%j', {
+    f: 'isScopedLetIdentifier',
+    identifier,
+    isNilNode: false,
+    isLetDeclaration: _.some(isLetDeclaration(identifier))(node.body),
+    isScopedLetIdentifier: !isEndOfBlock(node) && isScopedLetIdentifier(identifier, node.parent)
+  });
   return _.some(isLetDeclaration(identifier))(node.body) ||
     (!isEndOfBlock(node) && isScopedLetIdentifier(identifier, node.parent));
 }
@@ -180,16 +199,14 @@ function isScopedLetVariableAssignment(node) {
     return false;
   }
 
-  // Debug('%j', {f: 'isScopedLetVariableAssignment', left: node.left});
-
+  debug('%j', {f: 'isScopedLetVariableAssignment', isAssignment: true});
   const identifier = _.get('name')(getLeftMostObject(node.left));
   return isScopedLetIdentifier(identifier, node.parent);
 }
 
 function isScopedVariable(arg, node, allowFunctionProps) {
-  // Debug('%j', {f: 'isScopedVariable', arg});
-
   const identifier = _.get('name')(getLeftMostObject(arg));
+  debug('%j', {f: 'isScopedVariable', identifier});
   return isScopedVariableIdentifier(identifier, node, allowFunctionProps);
 }
 
@@ -210,6 +227,7 @@ function isScopedFunction(arg, node) {
 }
 
 function isExemptedReducer(exemptedReducerCallees, node) {
+  debug('isExemptedReducer');
   const endOfBlockNode = getBlockAncestor(node);
   const callee = _.get('parent.callee', endOfBlockNode);
   return callee && _.includes(_.getOr(_.get('name', callee), 'property.name', callee), exemptedReducerCallees);

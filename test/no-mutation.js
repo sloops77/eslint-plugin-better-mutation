@@ -30,9 +30,12 @@ ruleTester.run('no-mutation', rule, {
     'let a = 1; a = 2;',
     'let a = ""; if (false) { a = "b"; }',
     'let a, b; b = 2;',
+    'let a, b=0; b += 2;',
     'let a = ""; if (false) { a += "b"; }',
-    'let [{a, b}] = {}; if (!a) { a = 1; }',
-    'let {a: x, b: y} = {a: 1, b: 2}; if (!x) { x = 1; } y+=1;',
+    'let {a, b} = {}; if (!a) { a = 1; }',
+    'let {a: x, b: y} = {a: 1, b: 2}; if (!x) { x = 1; } ',
+    'let {a: x, b: y} = {a: 1, b: 2}; y+=1;',
+    'let [x, y] = [1,2]; y+=1;',
     'var b = { x: 1 }; b.x += 1;',
     'for(var i = 0; i < 3; i+=1) {}',
     'function foo() {const a = {}; if (true) {a.b = "c"}}',
@@ -309,6 +312,10 @@ ruleTester.run('no-mutation', rule, {
     {
       code: '_.reduce((acc, x) => { acc[2] = 1; return acc; }, [], [1,2,3])',
       options: [{reducers: []}],
+      errors: [reassignmentError]
+    },
+    {
+      code: 'let a, b; b += 2;',
       errors: [reassignmentError]
     }
   ]
