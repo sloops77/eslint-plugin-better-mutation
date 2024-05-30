@@ -123,7 +123,7 @@ function isVariableDeclaration(identifier) {
     const declaration = getDeclaration(identifier, finalNode);
     return (
       _.isMatch({type: 'VariableDeclarator', id: {name: identifier}}, declaration) &&
-      isValidInit(_.get('init', declaration), finalNode)
+      isValidInit(_.get('init', declaration), finalNode);
     );
   };
 }
