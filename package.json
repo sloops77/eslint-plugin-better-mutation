@@ -55,7 +55,7 @@
     "eslint-ava-rule-tester": "~4.2.0",
     "inject-in-tag": "~1.1.1",
     "nyc": "~15.1.0",
-    "pify": "~5.0.0",
+    "pify": "~6.1.0",
     "rimraf": "~3.0.2",
     "tap-xunit": "~2.4.1",
     "xo": "~0.35.0"
