@@ -2054,10 +2054,10 @@ eslint-ast-utils@^1.1.0, eslint-ast-utils@~1.1.0:
     lodash.get "^4.4.2"
     lodash.zip "^4.2.0"
 
-eslint-ava-rule-tester@~4.0.0:
-  version "4.0.0"
-  resolved "https://registry.npmjs.org/eslint-ava-rule-tester/-/eslint-ava-rule-tester-4.0.0.tgz#f64124bd971b256f77d6dbfdbf57bd770a0ea326"
-  integrity sha512-bR0ogk+1Orb/+rj17MyuRObhcepqAXnwQJUpPO0pdTLwwdzjOqzqyWl4o/kHQTnwCOwcGvkBPS59KVbbCFCVRg==
+eslint-ava-rule-tester@~4.2.0:
+  version "4.2.0"
+  resolved "https://registry.yarnpkg.com/eslint-ava-rule-tester/-/eslint-ava-rule-tester-4.2.0.tgz#4385f9abca85e5ec0c906366579c0be633371fe8"
+  integrity sha512-Ns63L6UNWJKx4ry0Yt7pCF2w6TGOpK5T9MlitvKxREDD2AXN4EZoRp+wnDOkH1+hdhl3biNXYpWsyF3onnTKyQ==
 
 eslint-config-prettier@^6.15.0:
   version "6.15.0"
