@@ -7,29 +7,29 @@ const isModuleExports = _.matches({
   type: 'MemberExpression',
   object: {
     type: 'Identifier',
-    name: 'module'
+    name: 'module',
   },
   property: {
     type: 'Identifier',
-    name: 'exports'
-  }
+    name: 'exports',
+  },
 });
 
 const isExports = _.matches({
-  type: 'Identifier', name: 'exports'
+  type: 'Identifier', name: 'exports',
 });
 
 const isPrototype = _.matches({
   type: 'MemberExpression',
   object: {
     object: {
-      type: 'Identifier'
+      type: 'Identifier',
     },
     property: {
       type: 'Identifier',
-      name: 'prototype'
-    }
-  }
+      name: 'prototype',
+    },
+  },
 });
 
 function isModuleExportsMemberExpression(node) {
@@ -38,44 +38,47 @@ function isModuleExportsMemberExpression(node) {
     isModuleExports,
     function (node) {
       return node.type === 'MemberExpression' && isModuleExportsMemberExpression(node.object);
-    }
+    },
   ])(node);
 }
 
-const isPrototypeAssignment = node => {
-  return _.flow(
-    _.property('left'),
-    isPrototype
-  )(node) && isScopedFunction(node.left, node.parent);
-};
+const isPrototypeAssignment = node => _.flow(
+  _.property('left'),
+  isPrototype,
+)(node) && isScopedFunction(node.left, node.parent);
 
 const isCommonJsExport = _.flow(
   _.property('left'),
   _.overSome([
     isExports,
     isModuleExports,
-    isModuleExportsMemberExpression
-  ])
+    isModuleExportsMemberExpression,
+  ]),
 );
 
 const ERROR_TYPES = {
   COMMON_JS: 'COMMON_JS',
   PROTOTYPE: 'PROTOTYPE',
-  REGULAR: 'REGULAR'
+  REGULAR: 'REGULAR',
 };
 
 function errorMessage(errorType) {
   const baseMessage = 'Unallowed reassignment';
   let extraInfo = '';
   switch (errorType) {
-    case ERROR_TYPES.COMMON_JS:
+    case ERROR_TYPES.COMMON_JS: {
       extraInfo = '. You may want to activate the `commonjs` option for this rule';
       break;
-    case ERROR_TYPES.PROTOTYPE:
+    }
+
+    case ERROR_TYPES.PROTOTYPE: {
       extraInfo = '. You may want to activate the `prototypes` option for this rule';
       break;
-    default:
+    }
+
+    default: {
       break;
+    }
   }
 
   return baseMessage + extraInfo;
@@ -104,8 +107,8 @@ function isExemptedIdentifier(exemptedIdentifiers, node) {
   }
 
   const matches = exemptedIdentifiers.some(matcher => matcher(node));
-  return matches ||
-    (node.object.type === 'MemberExpression' && isExemptedIdentifier(exemptedIdentifiers, node.object));
+  return matches
+    || (node.object.type === 'MemberExpression' && isExemptedIdentifier(exemptedIdentifiers, node.object));
 }
 
 const create = function (context) {
@@ -125,12 +128,12 @@ const create = function (context) {
       const isCommonJs = isCommonJsExport(node);
       const isPrototypeAss = isPrototypeAssignment(node);
 
-      if ((isCommonJs && acceptCommonJs) ||
-        (isPrototypeAss && acceptPrototypes) ||
-        isExemptedIdentifier(exemptedIdentifiers, node.left) ||
-        isScopedLetVariableAssignment(node) ||
-        isScopedVariable(node.left, node.parent, allowFunctionProps) ||
-        isExemptedReducer(exemptedReducerCallees, node.parent)) {
+      if ((isCommonJs && acceptCommonJs)
+        || (isPrototypeAss && acceptPrototypes)
+        || isExemptedIdentifier(exemptedIdentifiers, node.left)
+        || isScopedLetVariableAssignment(node)
+        || isScopedVariable(node.left, node.parent, allowFunctionProps)
+        || isExemptedReducer(exemptedReducerCallees, node.parent)) {
         return;
       }
 
@@ -143,15 +146,15 @@ const create = function (context) {
 
       context.report({
         node,
-        message: errorMessage(errorType)
+        message: errorMessage(errorType),
       });
     },
     UpdateExpression(node) {
       context.report({
         node,
-        message: `Unallowed use of \`${node.operator}\` operator`
+        message: `Unallowed use of \`${node.operator}\` operator`,
       });
-    }
+    },
   };
 };
 
@@ -159,16 +162,16 @@ const schema = [{
   type: 'object',
   properties: {
     commonjs: {
-      type: 'boolean'
+      type: 'boolean',
     },
     allowThis: {
-      type: 'boolean'
+      type: 'boolean',
     },
     prototypes: {
-      type: 'boolean'
+      type: 'boolean',
     },
     functionProps: {
-      type: 'boolean'
+      type: 'boolean',
     },
     exceptions: {
       type: 'array',
@@ -176,20 +179,20 @@ const schema = [{
         type: 'object',
         properties: {
           object: {
-            type: 'string'
+            type: 'string',
           },
           property: {
-            type: 'string'
-          }
-        }
-      }
+            type: 'string',
+          },
+        },
+      },
     },
     reducers: {
       type: 'array',
       items: {type: 'string'},
-      default: ['reduce']
-    }
-  }
+      default: ['reduce'],
+    },
+  },
 }];
 
 module.exports = {
@@ -198,7 +201,7 @@ module.exports = {
     schema,
     docs: {
       description: 'Forbid the use of mutating operators.',
-      recommended: 'error'
-    }
-  }
+      recommended: 'error',
+    },
+  },
 };

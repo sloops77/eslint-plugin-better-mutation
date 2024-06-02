@@ -13,19 +13,19 @@ const mutatingMethods = new Set([
   'splice',
   'unshift',
   'unwatch',
-  'watch'
+  'watch',
 ]);
 
 function getNameIfPropertyIsIdentifier(property) {
-  return property.type === 'Identifier' &&
-    mutatingMethods.has(property.name) &&
-    property.name;
+  return property.type === 'Identifier'
+    && mutatingMethods.has(property.name)
+    && property.name;
 }
 
 function getNameIfPropertyIsLiteral(property) {
-  return property.type === 'Literal' &&
-    mutatingMethods.has(property.value) &&
-    property.value;
+  return property.type === 'Literal'
+    && mutatingMethods.has(property.value)
+    && property.value;
 }
 
 const create = function (context) {
@@ -47,10 +47,10 @@ const create = function (context) {
       if (name && !isScopedVariable(node.callee.object, node.parent) && !isObjectExpression(node.callee.object) && !isExemptedReducer(exemptedReducerCallees, node.parent)) {
         context.report({
           node,
-          message: `The use of method \`${name}\` is not allowed as it might be a mutating method`
+          message: `The use of method \`${name}\` is not allowed as it might be a mutating method`,
         });
       }
-    }
+    },
   };
 };
 
@@ -60,15 +60,15 @@ const schema = [{
     allowedObjects: {
       type: 'array',
       items: {
-        type: 'string'
-      }
+        type: 'string',
+      },
     },
     reducers: {
       type: 'array',
       items: {type: 'string'},
-      default: ['reduce']
-    }
-  }
+      default: ['reduce'],
+    },
+  },
 }];
 
 module.exports = {
@@ -77,7 +77,7 @@ module.exports = {
   meta: {
     docs: {
       description: 'Forbid the use of mutating methods.',
-      recommended: 'error'
-    }
-  }
+      recommended: 'error',
+    },
+  },
 };
