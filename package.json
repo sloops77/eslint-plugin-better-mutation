@@ -10,7 +10,7 @@
     "url": "https://github.com/sloops77"
   },
   "engines": {
-    "node": ">=10.0.0"
+    "node": ">=18.0.0"
   },
   "scripts": {
     "init:ci": "rimraf reports && mkdir -p reports",
@@ -58,14 +58,18 @@
     "pify": "~6.1.0",
     "rimraf": "~3.0.2",
     "tap-xunit": "~2.4.1",
-    "xo": "~0.35.0"
+    "xo": "~0.56.0"
   },
   "peerDependencies": {
     "eslint": ">=6"
   },
   "xo": {
     "esnext": true,
-    "space": 2
+    "space": 2,
+    "rules": {
+      "unicorn/prefer-module": "off",
+      "import/extensions": "off"
+    }
   },
   "ava": {
     "babel": true

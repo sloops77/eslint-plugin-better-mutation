@@ -32,7 +32,7 @@ const mutatingFunctions = [
   '_.setWith',
   '_.unset',
   '_.update',
-  '_.updateWith'
+  '_.updateWith',
 ];
 
 const isLodashFn = _.startsWith('_.');
@@ -47,17 +47,17 @@ function buildIsMutatingFunction(ignoredMethods, useLodashFunctionImports) {
         type: 'MemberExpression',
         object: {
           type: 'Identifier',
-          name: objectName
+          name: objectName,
         },
         property: {
           type: 'Identifier',
-          name: propertyName
-        }
+          name: propertyName,
+        },
       }) : ({
         type: 'Identifier',
-        name: objectName
+        name: objectName,
       });
-    })
+    }),
   )(mutatingFunctions);
 
   return _.overSome(_.map(spec => _.matches(spec), matchesSpecs));
@@ -79,10 +79,10 @@ const create = function (context) {
       if (isMutatingFunction(node.callee) && !isAllowedFirstArgument(node.arguments[0], node, allowFunctionProps) && !isExemptedReducer(exemptedReducerCallees, node.parent)) {
         context.report({
           node,
-          message: 'Unallowed use of mutating functions'
+          message: 'Unallowed use of mutating functions',
         });
       }
-    }
+    },
   };
 };
 
@@ -93,27 +93,27 @@ module.exports = {
       type: 'object',
       properties: {
         functionProps: {
-          type: 'boolean'
+          type: 'boolean',
         },
         ignoredMethods: {
           type: 'array',
           items: {
-            type: 'string'
-          }
+            type: 'string',
+          },
         },
         useLodashFunctionImports: {
-          type: 'boolean'
+          type: 'boolean',
         },
         reducers: {
           type: 'array',
           items: {type: 'string'},
-          default: ['reduce']
-        }
-      }
+          default: ['reduce'],
+        },
+      },
     }],
     docs: {
       description: 'Forbid the use of [`Object.assign()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/assign) with a variable as first argument.',
-      recommended: 'error'
-    }
-  }
+      recommended: 'error',
+    },
+  },
 };

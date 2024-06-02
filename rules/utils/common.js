@@ -3,42 +3,42 @@ const debug = require('debug')('eslint-better-mutation');
 
 const isReference = _.flow(
   _.property('type'),
-  _.includes(_, ['MemberExpression', 'Identifier'])
+  _.includes(_, ['MemberExpression', 'Identifier']),
 );
 
 const isExportDeclaration = _.flow(
   _.property('type'),
-  _.includes(_, ['ExportDefaultDeclaration', 'ExportNamedDeclaration'])
+  _.includes(_, ['ExportDefaultDeclaration', 'ExportNamedDeclaration']),
 );
 
 const isObjectExpression = _.flow(
   _.property('type'),
-  _.includes(_, ['ObjectExpression', 'ArrayExpression'])
+  _.includes(_, ['ObjectExpression', 'ArrayExpression']),
 );
 
 const isLiteralExpression = _.flow(
   _.property('type'),
-  _.includes(_, ['Literal'])
+  _.includes(_, ['Literal']),
 );
 
 const isFunctionExpression = _.flow(
   _.property('type'),
-  _.includes(_, ['FunctionExpression', 'ArrowFunctionExpression'])
+  _.includes(_, ['FunctionExpression', 'ArrowFunctionExpression']),
 );
 
 const isConditionalExpression = _.flow(
   _.property('type'),
-  _.includes(_, ['ConditionalExpression'])
+  _.includes(_, ['ConditionalExpression']),
 );
 
 const isClassOrFunctionDeclaration = _.flow(
   _.property('type'),
-  _.includes(_, ['ClassDeclaration', 'FunctionDeclaration'])
+  _.includes(_, ['ClassDeclaration', 'FunctionDeclaration']),
 );
 
 const isEndOfBlock = _.flow(
   _.property('type'),
-  _.includes(_, ['Program', 'FunctionDeclaration', 'ClassDeclaration', 'FunctionExpression', 'ArrowFunctionExpression'])
+  _.includes(_, ['Program', 'FunctionDeclaration', 'ClassDeclaration', 'FunctionExpression', 'ArrowFunctionExpression']),
 );
 
 function getBlockAncestor(node) {
@@ -69,12 +69,17 @@ function isForStatementVariable(identifier, node) {
 
 function getReference(node) {
   switch (node.type) {
-    case 'MemberExpression':
+    case 'MemberExpression': {
       return node.object;
-    case 'Identifier':
+    }
+
+    case 'Identifier': {
       return node;
-    default:
+    }
+
+    default: {
       return undefined;
+    }
   }
 }
 
@@ -83,14 +88,14 @@ function isValidInit(rhsExpression, node) {
     isObjectExpression: isObjectExpression(rhsExpression),
     isLiteralExpression: isLiteralExpression(rhsExpression),
     isScopedVariableRef: (isReference(rhsExpression) && isScopedVariable(getReference(rhsExpression), node.parent)),
-    isConditionalExpressionInit: isConditionalExpression(rhsExpression) && isValidInit(rhsExpression.alternate, node) && isValidInit(rhsExpression.consequent, node)
+    isConditionalExpressionInit: isConditionalExpression(rhsExpression) && isValidInit(rhsExpression.alternate, node) && isValidInit(rhsExpression.consequent, node),
   });
-  return isObjectExpression(rhsExpression) ||
-    isLiteralExpression(rhsExpression) ||
+  return isObjectExpression(rhsExpression)
+    || isLiteralExpression(rhsExpression)
     // TODO Fix 'let a = c(); a = 1;' by ensuring that function c() { return  {} };
     // isCallExpression(rhsExpression) /* && called Function always returns a ValidInit */ ||
-    (isReference(rhsExpression) && isScopedVariable(getReference(rhsExpression), node.parent)) ||
-    (isConditionalExpression(rhsExpression) && isValidInit(rhsExpression.alternate, node) && isValidInit(rhsExpression.consequent, node));
+    || (isReference(rhsExpression) && isScopedVariable(getReference(rhsExpression), node.parent))
+    || (isConditionalExpression(rhsExpression) && isValidInit(rhsExpression.alternate, node) && isValidInit(rhsExpression.consequent, node));
 }
 
 function getLeftMostObject(arg) {
@@ -137,11 +142,11 @@ function isVariableDeclaration(identifier) {
       f: 'isVariableDeclaration',
       nodeType: finalNode.type,
       declarationType: declaration?.type,
-      isValidInit: isValidInit(_.get('init', declaration), finalNode)
+      isValidInit: isValidInit(_.get('init', declaration), finalNode),
     });
     return (
-      !_.isNil(declaration) &&
-      isValidInit(_.get('init', declaration), finalNode)
+      !_.isNil(declaration)
+      && isValidInit(_.get('init', declaration), finalNode)
     );
   };
 }
@@ -161,7 +166,7 @@ function isLetDeclaration(identifier) {
       isLetNode: true,
       nodeType: finalNode?.type,
       nodeKind: finalNode?.kind,
-      declarationType: declaration?.type
+      declarationType: declaration?.type,
     });
     return !_.isNil(declaration);
   };
@@ -172,10 +177,10 @@ function isScopedVariableIdentifier(identifier, node, allowFunctionProps) {
     return false;
   }
 
-  return _.some(isVariableDeclaration(identifier))(node.body) ||
-    (allowFunctionProps && isScopedFunctionIdentifier(identifier, node)) ||
-    isForStatementVariable(identifier, node) ||
-    (!isEndOfBlock(node) && isScopedVariableIdentifier(identifier, node.parent));
+  return _.some(isVariableDeclaration(identifier))(node.body)
+    || (allowFunctionProps && isScopedFunctionIdentifier(identifier, node))
+    || isForStatementVariable(identifier, node)
+    || (!isEndOfBlock(node) && isScopedVariableIdentifier(identifier, node.parent));
 }
 
 function isScopedLetIdentifier(identifier, node) {
@@ -188,10 +193,10 @@ function isScopedLetIdentifier(identifier, node) {
     identifier,
     isNilNode: false,
     isLetDeclaration: _.some(isLetDeclaration(identifier))(node.body),
-    isScopedLetIdentifier: !isEndOfBlock(node) && isScopedLetIdentifier(identifier, node.parent)
+    isScopedLetIdentifier: !isEndOfBlock(node) && isScopedLetIdentifier(identifier, node.parent),
   });
-  return _.some(isLetDeclaration(identifier))(node.body) ||
-    (!isEndOfBlock(node) && isScopedLetIdentifier(identifier, node.parent));
+  return _.some(isLetDeclaration(identifier))(node.body)
+    || (!isEndOfBlock(node) && isScopedLetIdentifier(identifier, node.parent));
 }
 
 function isScopedLetVariableAssignment(node) {
@@ -216,9 +221,9 @@ function isScopedFunctionIdentifier(identifier, node) {
   }
 
   return _.some(
-    n => isFunctionDeclaration(identifier)(n) || isExportedFunctionDeclaration(identifier)(n)
-  )(node.body) ||
-    (!isEndOfBlock(node) && isScopedFunctionIdentifier(identifier, node.parent));
+    n => isFunctionDeclaration(identifier)(n) || isExportedFunctionDeclaration(identifier)(n),
+  )(node.body)
+    || (!isEndOfBlock(node) && isScopedFunctionIdentifier(identifier, node.parent));
 }
 
 function isScopedFunction(arg, node) {
@@ -242,5 +247,5 @@ module.exports = {
   isScopedVariable,
   isScopedLetVariableAssignment,
   isScopedFunction,
-  isExemptedReducer
+  isExemptedReducer,
 };
