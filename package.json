@@ -1,6 +1,6 @@
 {
   "name": "eslint-plugin-better-mutation",
-  "version": "1.4.0",
+  "version": "1.4.2",
   "description": "ESLint rules for controlling where and how mutation is used.",
   "license": "MIT",
   "repository": "sloops77/eslint-plugin-better-mutation",
@@ -43,10 +43,10 @@
   ],
   "dependencies": {
     "create-eslint-index": "~1.0.0",
+    "debug": "~4.3.5",
     "eslint-ast-utils": "~1.1.0",
     "import-modules": "~2.0.0",
-    "lodash": "~4.17.21",
-    "debug": "~4.3.1"
+    "lodash": "~4.17.21"
   },
   "devDependencies": {
     "@ava/babel": "^2.0.0",
