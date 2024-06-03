@@ -2530,10 +2530,10 @@ import-modules@^2.1.0:
   resolved "https://registry.yarnpkg.com/import-modules/-/import-modules-2.1.0.tgz#abe7df297cb6c1f19b57246eb8b8bd9664b6d8c2"
   integrity sha512-8HEWcnkbGpovH9yInoisxaSoIg9Brbul+Ju3Kqe2UsYDUBJD/iQjSgEj0zPcTDPKfPp2fs5xlv1i+JSye/m1/A==
 
-import-modules@~2.0.0:
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/import-modules/-/import-modules-2.0.0.tgz#9c1e13b4e7a15682f70a6e3fa29534e4540cfc5d"
-  integrity sha512-iczM/v9drffdNnABOKwj0f9G3cFDon99VcG1mxeBsdqnbd+vnQ5c2uAiCHNQITqFTOPaEvwg3VjoWCur0uHLEw==
+import-modules@~3.2.0:
+  version "3.2.0"
+  resolved "https://registry.yarnpkg.com/import-modules/-/import-modules-3.2.0.tgz#4acd64b303784b56acef82c348b9f1cdb9d9a95c"
+  integrity sha512-rnImqdZ/8Sopu0IxVo0l5tN3msvVwz794uJLnn+Jb01+FaAHsKrqE78tmE7z9JRZRsefBtBC7h4yphU4RGXR7A==
 
 imurmurhash@^0.1.4:
   version "0.1.4"
