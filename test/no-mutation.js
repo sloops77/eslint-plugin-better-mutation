@@ -4,7 +4,7 @@ const rule = require('../rules/no-mutation');
 
 const ruleTester = avaRuleTester(test, {
   env: {
-    es6: true,
+    es2020: true,
   },
   parserOptions: {
     sourceType: 'module',
@@ -43,7 +43,9 @@ ruleTester.run('no-mutation', rule, {
     'function foo(bar) { let a = bar; if (true) {a = {}}}',
     'function foo(bar) { let a = bar; while (true) { if (true) { a = {} } } }',
     'const a = []; a[0] = 2;',
+    'const [omittedIndex, ...a] = []; a[0] = 2;',
     'const o = {}; o["name"] = 2;',
+    'const {a, b, ...o} = {a: 10, b: 20, c: 30, d: 40, e: 50}; o["b"] = 2;',
     // 'let a = 2; function() { a += 2; }',
     '_.reduce((acc, x) => { acc[2] = 1; return acc; }, [], [1,2,3])',
     '[1,2,3].reduce((acc, x) => { acc += x; return acc; }, 0)',

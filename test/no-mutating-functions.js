@@ -4,7 +4,7 @@ const rule = require('../rules/no-mutating-functions');
 
 const ruleTester = avaRuleTester(test, {
   env: {
-    es6: true,
+    es2020: true,
   },
   parserOptions: {
     sourceType: 'module',
