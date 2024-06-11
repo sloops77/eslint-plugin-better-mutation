@@ -117,12 +117,12 @@ function getIdentifierDeclaration(identifier, node) {
     const id = _.get('id', n);
     if (_.get('type', id) === 'ObjectPattern') {
       const destructuredProperties = _.get('properties', id) || [];
-      return _.find(element => element.value?.name === identifier || (element.type ==='RestElement' && element.argument?.name === identifier), destructuredProperties);
+      return _.find(prop => prop.value?.name === identifier || (prop.type === 'RestElement' && prop.argument?.name === identifier), destructuredProperties);
     }
 
     if (_.get('type', id) === 'ArrayPattern') {
       const destructuredElements = _.get('elements', id) || [];
-      return _.find(element => element.name === identifier || (element.type ==='RestElement' && element.argument?.name === identifier), destructuredElements);
+      return _.find(element => element.name === identifier || (element.type === 'RestElement' && element.argument?.name === identifier), destructuredElements);
     }
 
     return _.get('name', id) === identifier;
