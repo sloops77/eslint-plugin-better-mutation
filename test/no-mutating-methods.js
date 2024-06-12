@@ -12,7 +12,7 @@ const ruleTester = avaRuleTester(test, {
 });
 
 const methodError = methodName => ({
-  message: `The use of method \`${methodName}\` is not allowed as it might be a mutating method`,
+  message: `Unsafe mutating method \`${methodName}\` is disallowed`,
 });
 
 ruleTester.run('no-mutating-methods', rule, {

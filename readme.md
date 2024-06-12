@@ -110,24 +110,41 @@ $ npm install --save-dev eslint eslint-plugin-better-mutation
 
 ## Usage
 
-Configure it in `.eslintrc`.
+### For flat config (Eslint 9.x and above)
+In an js file
 
+```js
+// eslint.config.mjs
+import pluginBetterMutation from "eslint-plugin-better-mutation";
+
+export default [
+  // ...
+  {
+    name: "my-awesome-project",
+    plugins: {
+      'better-mutation': pluginBetterMutation,
+      // ... other plugins
+    },
+    rules: [
+      ...pluginBetterMutation.configs.recommended.rules,
+      // ... other plugins and rules
+    ]
+  },
+  // ...
+]; 
+```
+
+### For classic config (Eslint 8.x and below)
 <!-- EXAMPLE_CONFIGURATION:START -->
+Configure it in `.eslintrc` or package.json.
 ```json
 {
   "name": "my-awesome-project",
   "eslintConfig": {
-    "env": {
-      "es6": true
-    },
     "plugins": [
       "better-mutation"
     ],
-    "rules": {
-      "better-mutation/no-mutating-functions": "error",
-      "better-mutation/no-mutating-methods": "error",
-      "better-mutation/no-mutation": "error"
-    }
+    "extends": "plugin:better-mutation/recommended"
   }
 }
 ```
@@ -142,20 +159,24 @@ Configure it in `.eslintrc`.
 
 <!-- RULES:END -->
 
-## Recommended configuration
+## Advanced configuration
+Advanced configuration enables setting individual rule configuration.
 
-This plugin exports a [`recommended` configuration](index.js) that enforces good practices.
-
-To enable this configuration, use the `extends` property in your `.eslintrc`.
-
-```json
-{
+```js
+export default {
   "name": "my-awesome-project",
   "eslintConfig": {
+    // ... other config
     "plugins": [
       "better-mutation"
+      // ... other plugins
     ],
-    "extends": "plugin:better-mutation/recommended"
+    "rules": {
+      "better-mutation/no-mutating-functions": "error",
+      "better-mutation/no-mutating-methods": "error",
+      "better-mutation/no-mutation": "error"
+      // ... other rules
+    }
   }
 }
 ```

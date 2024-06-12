@@ -15,7 +15,10 @@ const internalRecommendedRules = createIndex.createConfig({
   field: 'meta.docs.recommended',
 }, rules);
 
-module.exports = {
+const plugin = {
+  meta: {
+    name: 'eslint-plugin-better-mutation',
+  },
   rules,
   configs: {
     recommended: {
@@ -24,3 +27,5 @@ module.exports = {
   },
   defaults,
 };
+
+module.exports = plugin;

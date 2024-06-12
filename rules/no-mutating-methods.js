@@ -52,37 +52,47 @@ const create = function (context) {
         && !isExemptedReducer(exemptedReducerCallees, node.parent)) {
         context.report({
           node,
-          message: `The use of method \`${name}\` is not allowed as it might be a mutating method`,
+          messageId: 'unsafeMutatingMethod',
+          data: {
+            name,
+          },
         });
       }
     },
   };
 };
 
-const schema = [{
-  type: 'object',
-  properties: {
-    allowedObjects: {
-      type: 'array',
-      items: {
-        type: 'string',
-      },
-    },
-    reducers: {
-      type: 'array',
-      items: {type: 'string'},
-      default: ['reduce'],
-    },
-  },
-}];
-
 module.exports = {
   create,
-  schema,
   meta: {
+    type: 'problem',
+    schema: [{
+      type: 'object',
+      properties: {
+        allowedObjects: {
+          type: 'array',
+          items: {
+            type: 'string',
+          },
+        },
+        reducers: {
+          type: 'array',
+          items: {type: 'string'},
+          default: defaultReducers,
+        },
+        initializers: {
+          type: 'array',
+          items: {type: 'string'},
+          default: defaultInitializers,
+        },
+      },
+    }],
     docs: {
-      description: 'Forbid the use of mutating methods.',
+      description: 'disallow unsafe mutating methods such as sort.',
       recommended: 'error',
+    },
+    messages: {
+      unsafeMutatingMethod: 'Unsafe mutating method `{{ name }}` is disallowed',
     },
   },
 };
