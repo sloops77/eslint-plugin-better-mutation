@@ -98,10 +98,6 @@ function sum(numbers) {
 
 ``` 
 
-## Currently unsupported
-
-- lodash fp
-
 ## Install
 
 ```
@@ -150,15 +146,6 @@ Configure it in `.eslintrc` or package.json.
 ```
 <!-- EXAMPLE_CONFIGURATION:END -->
 
-## Rules
-
-<!-- RULES:START -->
-- [no-mutation](docs/rules/no-mutation.md) - Forbid the use of mutating operators on non-local variables.
-- [no-mutating-methods](docs/rules/no-mutating-methods.md) - Forbid the use of mutating methods on non-local variables such as push or _.remove.
-- [no-mutating-functions](docs/rules/no-mutating-functions.md) - Forbid the use of [`Object.assign() and lodash mutation methods`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/assign) with a non-local variable as first argument.
-
-<!-- RULES:END -->
-
 ## Advanced configuration
 Advanced configuration enables setting individual rule configuration.
 
@@ -180,6 +167,20 @@ export default {
   }
 }
 ```
+
+### Rules
+
+<!-- RULES:START -->
+- [no-mutation](docs/rules/no-mutation.md) - Forbid the use of mutating operators on non-local variables.
+- [no-mutating-methods](docs/rules/no-mutating-methods.md) - Forbid the use of mutating methods on non-local variables such as push or _.remove.
+- [no-mutating-functions](docs/rules/no-mutating-functions.md) - Forbid the use of [`Object.assign() and lodash mutation methods`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/assign) with a non-local variable as first argument.
+
+<!-- RULES:END -->
+
+
+## Currently unsupported
+
+- lodash fp
 
 See [ESLint documentation](http://eslint.org/docs/user-guide/configuring#extending-configuration-files) for more information about extending configuration files.
 
