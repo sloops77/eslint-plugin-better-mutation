@@ -121,6 +121,24 @@ const create = function (context) {
     exemptedIdentifiers.push(_.matches({type: 'MemberExpression', object: {type: 'ThisExpression'}}));
   }
 
+  const exemptedInitializers = _.getOr(
+    [
+      'Array.from',
+      'Array.fromAsync',
+      'Array.of',
+      'Map.groupBy',
+      'Object.create',
+      'Object.entries',
+      'Object.fromEntries',
+      'Object.getOwnPropertyNames',
+      'Object.getOwnPropertySymbols',
+      'Object.groupBy',
+      'Object.keys',
+      'Object.values',
+      'structuredClone',
+    ],
+    ['options', 0, 'initializers'],
+    context);
   const exemptedReducerCallees = _.getOr(['reduce'], ['options', 0, 'reducers'], context);
 
   return {
@@ -132,7 +150,7 @@ const create = function (context) {
         || (isPrototypeAss && acceptPrototypes)
         || isExemptedIdentifier(exemptedIdentifiers, node.left)
         || isScopedLetVariableAssignment(node)
-        || isScopedVariable(node.left, node.parent, allowFunctionProps)
+        || isScopedVariable(node.left, node.parent, allowFunctionProps, exemptedInitializers)
         || isExemptedReducer(exemptedReducerCallees, node.parent)) {
         return;
       }
