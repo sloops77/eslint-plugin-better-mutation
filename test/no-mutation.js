@@ -156,6 +156,15 @@ ruleTester.run('no-mutation', rule, {
       code: 'function Clazz() { }; Clazz.prototype.foo = function() {}',
       options: [{prototypes: true}],
     },
+    {
+      code: 'fold((acc, x) => { acc[2] = 1; return acc; }, [], [1,2,3])',
+      options: [{reducers: ['fold']}],
+    },
+    'const a = new MyObject(42); a.foo = 2;',
+    {
+      code: 'const x = MyObject.init(42); x.foo += 1',
+      options: [{initializers: ['MyObject.init']}],
+    },
   ],
   invalid: [
     {

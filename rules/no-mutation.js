@@ -3,6 +3,24 @@
 const _ = require('lodash/fp');
 const {isScopedVariable, isScopedFunction, isExemptedReducer, isScopedLetVariableAssignment} = require('./utils/common');
 
+const defaultInitializers = [
+  'Array.from',
+  'Array.fromAsync',
+  'Array.of',
+  'Map.groupBy',
+  'Object.create',
+  'Object.entries',
+  'Object.fromEntries',
+  'Object.getOwnPropertyNames',
+  'Object.getOwnPropertySymbols',
+  'Object.groupBy',
+  'Object.keys',
+  'Object.values',
+  'structuredClone',
+];
+
+const defaultReducers = ['reduce'];
+
 const isModuleExports = _.matches({
   type: 'MemberExpression',
   object: {
@@ -121,25 +139,8 @@ const create = function (context) {
     exemptedIdentifiers.push(_.matches({type: 'MemberExpression', object: {type: 'ThisExpression'}}));
   }
 
-  const exemptedInitializers = _.getOr(
-    [
-      'Array.from',
-      'Array.fromAsync',
-      'Array.of',
-      'Map.groupBy',
-      'Object.create',
-      'Object.entries',
-      'Object.fromEntries',
-      'Object.getOwnPropertyNames',
-      'Object.getOwnPropertySymbols',
-      'Object.groupBy',
-      'Object.keys',
-      'Object.values',
-      'structuredClone',
-    ],
-    ['options', 0, 'initializers'],
-    context);
-  const exemptedReducerCallees = _.getOr(['reduce'], ['options', 0, 'reducers'], context);
+  const exemptedInitializers = context?.options?.[0]?.initializers ?? defaultInitializers;
+  const exemptedReducerCallees = context?.options?.[0]?.reducers ?? defaultReducers;
 
   return {
     AssignmentExpression(node) {
@@ -208,7 +209,12 @@ const schema = [{
     reducers: {
       type: 'array',
       items: {type: 'string'},
-      default: ['reduce'],
+      default: defaultReducers,
+    },
+    initializers: {
+      type: 'array',
+      items: {type: 'string'},
+      default: defaultInitializers,
     },
   },
 }];
@@ -222,4 +228,9 @@ module.exports = {
       recommended: 'error',
     },
   },
+  defaults: {
+    defaultInitializers,
+    defaultReducers,
+  },
+
 };
