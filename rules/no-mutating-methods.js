@@ -48,10 +48,6 @@ const create = function (context) {
       if (name
         && !isScopedVariable(node.callee.object, node.parent, false, exemptedInitializers)
         && !isValidInit(node.callee.object, node.parent, false, exemptedInitializers)
-        // (
-        //   (isNewExpression(node.callee.object) && node.callee.object.callee.name !== 'Object') // In JS, the Object constructor doesnt allocate memory so it is buggy and should be avoided
-        //   || isExemptedInitializer(node.callee.object, exemptedInitializers)
-        // )
         && !isObjectExpression(node.callee.object)
         && !isExemptedReducer(exemptedReducerCallees, node.parent)) {
         context.report({
