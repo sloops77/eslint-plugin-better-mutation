@@ -34,7 +34,7 @@ The default value is `["reduce"]`
 You can set the options like this:
 
 ```js
-const { rules: { ["no-mutation"]: { defaults: { defaultReducers, defaultInitializers } } } } = require('eslint-better-mutation');
+const { defaults: { defaultReducers, defaultInitializers } } = require('eslint-better-mutation');
 
 module.exports = {
   "eslintConfig": {

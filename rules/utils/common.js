@@ -27,11 +27,6 @@ const isCallExpression = _.flow(
   _.includes(_, ['CallExpression']),
 );
 
-const isLiteralExpression = _.flow(
-  _.property('type'),
-  _.includes(_, ['Literal']),
-);
-
 const isFunctionExpression = _.flow(
   _.property('type'),
   _.includes(_, ['FunctionExpression', 'ArrowFunctionExpression']),
@@ -57,7 +52,7 @@ const buildInitializer = callee => {
     return callee.name;
   }
 
-  if (callee.object && callee.property) {
+  if (callee.object?.name) {
     return `${callee.object.name}.${callee.property.name}`;
   }
 
@@ -70,7 +65,11 @@ const isExemptedInitializer = (rhsExpression, exemptedInitializers) => {
   }
 
   const initializer = buildInitializer(rhsExpression.callee);
-  return exemptedInitializers.includes(initializer);
+  if (exemptedInitializers.includes(initializer)) {
+    return true;
+  }
+
+  return isExemptedInitializer(rhsExpression.callee.object, exemptedInitializers);
 };
 
 function getBlockAncestor(node) {
@@ -93,7 +92,7 @@ function isExportedFunctionDeclaration(identifier) {
 
 function isForStatementVariable(identifier, node, exemptedInitializers) {
   if (node.type === 'ForStatement') {
-    return isVariableDeclaration(identifier, exemptedInitializers)(node.init);
+    return isVariableDeclaration(identifier, false, exemptedInitializers)(node.init);
   }
 
   return false;
@@ -115,14 +114,16 @@ function getReference(node) {
   }
 }
 
-function isValidInit(rhsExpression, node, exemptedInitializers) {
-  return isLiteral(rhsExpression)
+function isValidInit(rhsExpression, node, allowFunctionProps, exemptedInitializers) {
+  return !_.isNil(rhsExpression) && (
+    isLiteral(rhsExpression)
     || (isNewExpression(rhsExpression) && rhsExpression.callee.name !== 'Object') // In JS, the Object constructor doesnt allocate memory so it is buggy and should be avoided
     || isExemptedInitializer(rhsExpression, exemptedInitializers)
     // TODO Replace/Add the following handling for exemptedInitializers by permitting 'let a = c(); a = 1;' by ensuring that function c() { return  {} };
     // isCallExpression(rhsExpression) /* && called Function always returns a ValidInit */ ||
-    || (isReference(rhsExpression) && isScopedVariable(getReference(rhsExpression), node.parent))
-    || (isConditionalExpression(rhsExpression) && isValidInit(rhsExpression.alternate, node, exemptedInitializers) && isValidInit(rhsExpression.consequent, node, exemptedInitializers));
+    || (isReference(rhsExpression) && isScopedVariable(getReference(rhsExpression), node.parent, allowFunctionProps, exemptedInitializers))
+    || (isConditionalExpression(rhsExpression) && isValidInit(rhsExpression.alternate, node, allowFunctionProps, exemptedInitializers) && isValidInit(rhsExpression.consequent, node, allowFunctionProps, exemptedInitializers))
+  );
 }
 
 function getLeftMostObject(arg) {
@@ -156,7 +157,7 @@ function getIdentifierDeclaration(identifier, node) {
   });
 }
 
-function isVariableDeclaration(identifier, exemptedInitializers) {
+function isVariableDeclaration(identifier, allowFunctionProps, exemptedInitializers) {
   return function (node) {
     const finalNode = node || {}; // Todo not sure about this defaulting. seems to fix weird bug
 
@@ -173,7 +174,7 @@ function isVariableDeclaration(identifier, exemptedInitializers) {
     // });
     return (
       !_.isNil(declaration)
-      && isValidInit(_.get('init', declaration), finalNode, exemptedInitializers)
+      && isValidInit(_.get('init', declaration), finalNode, allowFunctionProps, exemptedInitializers)
     );
   };
 }
@@ -191,14 +192,14 @@ function isLetDeclaration(identifier) {
   };
 }
 
-function isScopedVariableIdentifier(identifier, node, exemptedInitializers) {
+function isScopedVariableIdentifier(identifier, node, allowFunctionProps, exemptedInitializers) {
   if (_.isNil(node)) {
     return false;
   }
 
-  return _.some(isVariableDeclaration(identifier, exemptedInitializers), node.body)
+  return _.some(isVariableDeclaration(identifier, allowFunctionProps, exemptedInitializers), node.body)
     || isForStatementVariable(identifier, node)
-    || (!isEndOfBlock(node) && isScopedVariableIdentifier(identifier, node.parent, exemptedInitializers));
+    || (!isEndOfBlock(node) && isScopedVariableIdentifier(identifier, node.parent, allowFunctionProps, exemptedInitializers));
 }
 
 function isScopedLetIdentifier(identifier, node) {
@@ -221,7 +222,11 @@ function isScopedLetVariableAssignment(node) {
 
 function isScopedVariable(arg, node, allowFunctionProps, exemptedInitializers) {
   const identifier = _.get('name')(getLeftMostObject(arg));
-  return (allowFunctionProps && isScopedFunctionIdentifier(identifier, node)) || isScopedVariableIdentifier(identifier, node, exemptedInitializers);
+  if (!identifier) {
+    return false;
+  }
+
+  return (allowFunctionProps && isScopedFunctionIdentifier(identifier, node)) || isScopedVariableIdentifier(identifier, node, allowFunctionProps, exemptedInitializers);
 }
 
 function isScopedFunctionIdentifier(identifier, node) {
@@ -247,13 +252,11 @@ function isExemptedReducer(exemptedReducerCallees, node) {
 }
 
 module.exports = {
-  isReference,
-  isObjectExpression,
-  isLiteralExpression,
+  isExemptedReducer,
   isFunctionExpression,
-  isConditionalExpression,
-  isScopedVariable,
+  isObjectExpression,
   isScopedLetVariableAssignment,
   isScopedFunction,
-  isExemptedReducer,
+  isScopedVariable,
+  isValidInit,
 };

@@ -2,6 +2,7 @@
 
 const importModules = require('import-modules');
 const createIndex = require('create-eslint-index');
+const defaults = require('./rules/utils/defaults');
 
 const rules = importModules('rules', {camelize: false});
 
@@ -21,4 +22,5 @@ module.exports = {
       rules: {...internalRecommendedRules, ...externalRecommendedRules},
     },
   },
+  defaults,
 };

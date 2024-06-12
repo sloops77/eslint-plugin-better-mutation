@@ -11,15 +11,42 @@ This rule supports the following options:
 `allowedObjects`: Array of names of objects whose methods can be used with no restrictions. This can be useful when using libraries like [`lodash/fp`](https://github.com/lodash/lodash/wiki/FP-Guide) or [`Ramda`](http://ramdajs.com), whose methods will not mutate the arguments. Defaults to an empty array.
 If set to `true`, then this rule will not report when assigning to or to a (sub-) property of `exports` or `module.exports`. Note that this will not report when reassigning or overwriting previous exports.
 
-`reducers`: An array of method names that are reducer's that are exempt from use method modification.
- 
+`reducers`: An array of method or function names that are like a reducer and therefore modification of the first parameter is will not error.
+The default value is `["reduce"]`
+
+`intializers`: An array of callees that are creating new values by allocating new memory. The result of calling these initializers may be modified within the block scope. The default value is `['Array.from',
+"Array.fromAsync",
+"Array.of",
+"Map.groupBy",
+"Object.create",
+"Object.entries",
+"Object.fromEntries",
+"Object.getOwnPropertyNames",
+"Object.getOwnPropertySymbols",
+"Object.groupBy",
+"Object.keys",
+"Object.values",
+"structuredClone"]` 
+
 You can set the options like this:
 
 ```js
-"better-migration/no-mutating-methods": ["error", {
-  "allowedObjects": ['_', 'R', 'fp'], 
-  "reducers": ['transform', 'reduce']
-}]
+const { defaults: { defaultReducers, defaultInitializers } } = require('eslint-better-mutation');
+
+module.exports = {
+  "eslintConfig": {
+    "rules": {
+      "better-migration/no-mutating-methods": ["error", {
+        "allowedObjects": ['_', 'R', 'fp'], 
+        "reducers": [...defaultReducers, 'transform'],
+        "initializers": [
+          ...defaultInitializers,
+          "MyObject.init"
+        ]
+      }]
+    }
+  }
+}
 ```
 
 ### Fail
@@ -43,8 +70,9 @@ probableArray.watch(fn);
 probableArray.foo();
 probableArray.concat(otherArray);
 
-
-Object.keys(object);
+Object.keys(o);
+Object.keys(o).sort();
+Object.keys(o).sort().reverse();
 
 /* eslint fp/no-mutating-methods: ["error", {"allowedObjects": ["_"]}] */
 var _ = require('lodash/fp');

@@ -2,24 +2,7 @@
 
 const _ = require('lodash/fp');
 const {isScopedVariable, isScopedFunction, isExemptedReducer, isScopedLetVariableAssignment} = require('./utils/common');
-
-const defaultInitializers = [
-  'Array.from',
-  'Array.fromAsync',
-  'Array.of',
-  'Map.groupBy',
-  'Object.create',
-  'Object.entries',
-  'Object.fromEntries',
-  'Object.getOwnPropertyNames',
-  'Object.getOwnPropertySymbols',
-  'Object.groupBy',
-  'Object.keys',
-  'Object.values',
-  'structuredClone',
-];
-
-const defaultReducers = ['reduce'];
+const {defaultReducers, defaultInitializers} = require('./utils/defaults');
 
 const isModuleExports = _.matches({
   type: 'MemberExpression',
@@ -227,10 +210,6 @@ module.exports = {
       description: 'Forbid the use of mutating operators.',
       recommended: 'error',
     },
-  },
-  defaults: {
-    defaultInitializers,
-    defaultReducers,
   },
 
 };
