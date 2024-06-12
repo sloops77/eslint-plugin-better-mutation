@@ -12,18 +12,53 @@ This rule supports the following options:
 
 `exceptions`: List of objects that describe exceptions to the rule. Each exception should have either or both `object` and `property` field set.
 
-`reducers`: An array of method names that are reducer's that are exempt from the do not modify parameters rule for their first argument.
+`prototypes`: If set to `true`, then this rule will permit assignment to the `prototype` of an object.
+
+`reducers`: An array of method or function names that are like a reducer and therefore modification of the first parameter is will not error. 
+The default value is `["reduce"]` 
+
+`intializers`: An array of callees that are creating new values by allocating new memory. The result of calling these initializers may be modified within the block scope. The default value is `['Array.from',
+"Array.fromAsync",
+"Array.of",
+"Map.groupBy",
+"Object.create",
+"Object.entries",
+"Object.fromEntries",
+"Object.getOwnPropertyNames",
+"Object.getOwnPropertySymbols",
+"Object.groupBy",
+"Object.keys",
+"Object.values",
+"structuredClone"]` 
 
 You can set the options like this:
 
 ```js
-"better-migration/no-mutation": ["error", {
-  "commonjs": true,
-  "allowThis": true,
-  "exceptions": [
-    {"object": "foo", "property": "bar"}
-  ]
-}]
+const { defaults: { defaultReducers, defaultInitializers } } = require('eslint-better-mutation');
+
+module.exports = {
+  "eslintConfig": {
+      "rules": {
+          "better-migration/no-mutation": ["error", {
+            "commonjs": true,
+            "allowThis": true,
+            "exceptions": [
+              {"object": "foo", "property": "bar"}
+            ],
+            "reducers": [
+              ...defaultReducers, 
+              "fold", 
+              "foldLeft", 
+              "foldRight"
+            ],
+            "initializers": [
+              ...defaultInitializers,
+              "MyObject.init"
+            ]
+          }]   
+      }
+  }
+}
 ```
 
 ### Pass
@@ -55,6 +90,13 @@ Component.propTypes = {
 function foo(a) {
   this.a = a || {};
 }
+
+/* eslint better-migration/no-mutation: ["error", {"reducers": [...defaultReducers, "fold"}] */
+const sum = fold((acc, num) => acc += num, 0, [1, 2, 3]);
+
+/* eslint better-migration/no-mutation: ["error", {"initializers": [...defaultInitializers, "MyObject.init"}] */
+const x = MyObject.init(42);
+x.foo = "bar"
 ```
 
 ### Fail
@@ -87,5 +129,11 @@ function foo(a) {
 }
 
 let a = 1; function bar() { a = 2; }
+
+const sum = foldRight((acc, num) => acc += num, 0, [1, 2, 3]);
+
+const x = Initializer.init(88);
+x.foo = "bar"
+
 ```
 

@@ -2,6 +2,7 @@
 
 const _ = require('lodash/fp');
 const {isScopedVariable, isScopedFunction, isExemptedReducer, isScopedLetVariableAssignment} = require('./utils/common');
+const {defaultReducers, defaultInitializers} = require('./utils/defaults');
 
 const isModuleExports = _.matches({
   type: 'MemberExpression',
@@ -121,7 +122,8 @@ const create = function (context) {
     exemptedIdentifiers.push(_.matches({type: 'MemberExpression', object: {type: 'ThisExpression'}}));
   }
 
-  const exemptedReducerCallees = _.getOr(['reduce'], ['options', 0, 'reducers'], context);
+  const exemptedInitializers = context?.options?.[0]?.initializers ?? defaultInitializers;
+  const exemptedReducerCallees = context?.options?.[0]?.reducers ?? defaultReducers;
 
   return {
     AssignmentExpression(node) {
@@ -132,7 +134,7 @@ const create = function (context) {
         || (isPrototypeAss && acceptPrototypes)
         || isExemptedIdentifier(exemptedIdentifiers, node.left)
         || isScopedLetVariableAssignment(node)
-        || isScopedVariable(node.left, node.parent, allowFunctionProps)
+        || isScopedVariable(node.left, node.parent, allowFunctionProps, exemptedInitializers)
         || isExemptedReducer(exemptedReducerCallees, node.parent)) {
         return;
       }
@@ -190,7 +192,12 @@ const schema = [{
     reducers: {
       type: 'array',
       items: {type: 'string'},
-      default: ['reduce'],
+      default: defaultReducers,
+    },
+    initializers: {
+      type: 'array',
+      items: {type: 'string'},
+      default: defaultInitializers,
     },
   },
 }];
@@ -204,4 +211,5 @@ module.exports = {
       recommended: 'error',
     },
   },
+
 };

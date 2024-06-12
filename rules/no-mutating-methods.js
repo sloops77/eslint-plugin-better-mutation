@@ -1,7 +1,7 @@
 'use strict';
 
-const _ = require('lodash/fp');
-const {isObjectExpression, isScopedVariable, isExemptedReducer} = require('./utils/common');
+const {isObjectExpression, isScopedVariable, isExemptedReducer, isValidInit} = require('./utils/common');
+const {defaultInitializers, defaultReducers} = require('./utils/defaults');
 
 const mutatingMethods = new Set([
   'copyWithin',
@@ -31,7 +31,8 @@ function getNameIfPropertyIsLiteral(property) {
 const create = function (context) {
   const options = context.options[0] || {};
   const allowedObjects = options.allowedObjects || [];
-  const exemptedReducerCallees = _.getOr(['reduce'], ['options', 0, 'reducers'], context);
+  const exemptedInitializers = context?.options?.[0]?.initializers ?? defaultInitializers;
+  const exemptedReducerCallees = context?.options?.[0]?.reducers ?? defaultReducers;
 
   return {
     CallExpression(node) {
@@ -44,7 +45,11 @@ const create = function (context) {
       }
 
       const name = getNameIfPropertyIsIdentifier(node.callee.property) || getNameIfPropertyIsLiteral(node.callee.property);
-      if (name && !isScopedVariable(node.callee.object, node.parent) && !isObjectExpression(node.callee.object) && !isExemptedReducer(exemptedReducerCallees, node.parent)) {
+      if (name
+        && !isScopedVariable(node.callee.object, node.parent, false, exemptedInitializers)
+        && !isValidInit(node.callee.object, node.parent, false, exemptedInitializers)
+        && !isObjectExpression(node.callee.object)
+        && !isExemptedReducer(exemptedReducerCallees, node.parent)) {
         context.report({
           node,
           message: `The use of method \`${name}\` is not allowed as it might be a mutating method`,

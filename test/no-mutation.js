@@ -43,9 +43,14 @@ ruleTester.run('no-mutation', rule, {
     'function foo(bar) { let a = bar; if (true) {a = {}}}',
     'function foo(bar) { let a = bar; while (true) { if (true) { a = {} } } }',
     'const a = []; a[0] = 2;',
+    'const a = new Array(2); a[0] = 2;',
+    'const a = Array.of(1,2,3); a[0] = 2;',
     'const [omittedIndex, ...a] = []; a[0] = 2;',
     'const o = {}; o["name"] = 2;',
     'const {a, b, ...o} = {a: 10, b: 20, c: 30, d: 40, e: 50}; o["b"] = 2;',
+    'const o = {...x}; o["name"] = 2;',
+    'const o = Object.fromEntries(x); o["name"] = 2;',
+    'const o = structuredClone(x); o["name"] = 2;',
     // 'let a = 2; function() { a += 2; }',
     '_.reduce((acc, x) => { acc[2] = 1; return acc; }, [], [1,2,3])',
     '[1,2,3].reduce((acc, x) => { acc += x; return acc; }, 0)',
@@ -150,6 +155,15 @@ ruleTester.run('no-mutation', rule, {
     {
       code: 'function Clazz() { }; Clazz.prototype.foo = function() {}',
       options: [{prototypes: true}],
+    },
+    {
+      code: 'fold((acc, x) => { acc[2] = 1; return acc; }, [], [1,2,3])',
+      options: [{reducers: ['fold']}],
+    },
+    'const a = new MyObject(42); a.foo = 2;',
+    {
+      code: 'const x = MyObject.init(42); x.foo += 1',
+      options: [{initializers: ['MyObject.init']}],
     },
   ],
   invalid: [
@@ -309,6 +323,10 @@ ruleTester.run('no-mutation', rule, {
     },
     {
       code: 'o["name"] = 2;',
+      errors: [reassignmentError],
+    },
+    {
+      code: 'const a = new Object(x); a[0] = 2;', // One of the many gotchas of javasript is that new Object doesnt allocate new space in memory, and does not shallow copy
       errors: [reassignmentError],
     },
     {

@@ -47,12 +47,21 @@ ruleTester.run('no-mutating-methods', rule, {
         allowedObjects: ['R'],
       }],
     },
+    // {
+    //   code: '_.sort(a).reverse()',
+    //   options: [{
+    //     allowedObjects: ['_'],
+    //   }],
+    // },
     'Object.keys(a)',
     'Object.values(a)',
     'var value = []; value.copyWithin(a);',
     'let array = [1,2,3]; reduce((acc, x) => { acc.push(1); return acc; }, array);',
     'let array = [1,2,3]; array.reduce((acc, x) => { acc.push(1); return acc; });',
     'let array = [1,2,3]; array.reduce((acc, x) => { if (x==1) { acc.push(1); } return acc; });',
+    'const myObject = {a: 1, b:2}; Object.keys(myObject).sort(mySortFn)',
+    'const myObject = {a: 1, b:2}; Object.keys(myObject).sort(mySortFn).reverse()',
+    'const myObject = {a: 1, b:2}; structuredClone(myObject).sort(mySortFn).reverse()',
   ],
   invalid: [
     {

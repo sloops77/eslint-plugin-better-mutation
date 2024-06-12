@@ -13,33 +13,7 @@ Locally declared variables are permitted to use mutation, because in most circum
 
 See [WHY.](why.md)
 
-## What's safe?
-Block scoped (`let`) or function scoped variables (`var`) can be reassigned safely. Even objects or arrays marked with `const` can have nested properties changed within the block scope they belong to. The same rules apply for mutating functions (e.g. `Object.assign()` and mutating methods `[].push()`
 
-```
-function foo() {
-  let i = 1; 
-  i = 2;
-  
-  const o = { a: 0 };
-  o.a += 1;
-}
-
-module.exports = { foo }; // by default commonjs exports are configured to be safe
-``` 
-
-Also modification of parameters within reducer functions/methods is safe. The parameters of a reducer a safe because 
-the loop that the reducer executes limits the scope of the accumulator to the reducer function. 
-
-``` 
-function sum(numbers) {
-  return numbers.reduce((acc, val) => {
-    acc += val;  // this is safe!
-    return acc;    
-  }, 0);
-}
-
-``` 
 
 ## What's not safe?
 Mutating variables of **shared** variables is unsafe. This means reassignment outside of the scope they are declared within whether its because they are globals, function parameters, or closed over variables can lead to undefined behaviour that is hard to debug and can cause race conditions. Instead of mutating always return a new value.
@@ -56,6 +30,77 @@ function bar() {
    a = 2; // don't reassign closed over vars
 }
 ```
+
+## What's safe?
+Block scoped (`let`) or function scoped variables (`var`) can be reassigned safely. 
+
+```
+function foo() {
+  let i = 1; 
+  i = 2;
+}
+```
+
+Even objects or arrays marked with `const` can have nested properties changed within the block scope they belong to. The same rules apply for mutating functions (e.g. `Object.assign()` and mutating methods `[].push()`
+```
+function foo() {
+  const o = { a: 0 };
+  o.a += 1;
+}
+```
+
+Common js uses assignment and is supported via a special case
+```
+module.exports = { foo }; // by default commonjs exports are configured to be safe
+```
+
+Variables created using constructors such as the Array constructor are safe to modify. However the Object constructor is not safe  because it returns the reference if its an object)
+```
+const myObject = new MyObject();
+myObject.foo = 'bar'
+
+const array = new Array(1, 2, 3);
+array[2] += 1;
+
+const o = new Object({1,2});
+o.foo = 'bar' // error
+```
+
+Variables created using static initializers such as the Array constructor, `Array.from` or `Array.of` are also safe to modify. 
+```
+const array = Array.of(1,2,3)
+array[2] += 1;
+```
+
+Similarly for Objects there are a few static initializers that are safe.
+```
+const o = Object.create({1,2,3})
+o.foo = 'bar' // safe
+```
+
+Changing an array created using an instance method such as map is not permitted. Most JS developers would never do this!
+If you would like it track the open issue at https://github.com/sloops77/eslint-plugin-better-mutation/issues
+```
+const x = array.map(i => i + 1);
+x[2] += 1;  // error
+```
+
+Reducer functions/methods are a special case and may modify the `accumulator` parameter because 
+the loop that the reducer executes limits the scope of the accumulator to the reducer function. 
+
+``` 
+function sum(numbers) {
+  return numbers.reduce((acc, val) => {
+    acc += val;  // this is safe!
+    return acc;    
+  }, 0);
+}
+
+``` 
+
+## Currently unsupported
+
+- lodash fp
 
 ## Install
 
@@ -81,7 +126,7 @@ Configure it in `.eslintrc`.
     "rules": {
       "better-mutation/no-mutating-functions": "error",
       "better-mutation/no-mutating-methods": "error",
-      "better-mutation/no-mutation": "error",
+      "better-mutation/no-mutation": "error"
     }
   }
 }

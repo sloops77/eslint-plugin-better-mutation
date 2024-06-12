@@ -1,5 +1,4 @@
 const _ = require('lodash/fp');
-const debug = require('debug')('eslint-better-mutation');
 
 const isReference = _.flow(
   _.property('type'),
@@ -11,14 +10,21 @@ const isExportDeclaration = _.flow(
   _.includes(_, ['ExportDefaultDeclaration', 'ExportNamedDeclaration']),
 );
 
+const isLiteral = _.flow(_.property('type'), _.includes(_, ['ObjectExpression', 'ArrayExpression', 'Literal']));
+
 const isObjectExpression = _.flow(
   _.property('type'),
   _.includes(_, ['ObjectExpression', 'ArrayExpression']),
 );
 
-const isLiteralExpression = _.flow(
+const isNewExpression = _.flow(
   _.property('type'),
-  _.includes(_, ['Literal']),
+  _.includes(_, ['NewExpression']),
+);
+
+const isCallExpression = _.flow(
+  _.property('type'),
+  _.includes(_, ['CallExpression']),
 );
 
 const isFunctionExpression = _.flow(
@@ -41,6 +47,31 @@ const isEndOfBlock = _.flow(
   _.includes(_, ['Program', 'FunctionDeclaration', 'ClassDeclaration', 'FunctionExpression', 'ArrowFunctionExpression']),
 );
 
+const buildInitializer = callee => {
+  if (callee.name) {
+    return callee.name;
+  }
+
+  if (callee.object?.name) {
+    return `${callee.object.name}.${callee.property.name}`;
+  }
+
+  return null;
+};
+
+const isExemptedInitializer = (rhsExpression, exemptedInitializers) => {
+  if (!isCallExpression(rhsExpression)) {
+    return false;
+  }
+
+  const initializer = buildInitializer(rhsExpression.callee);
+  if (exemptedInitializers.includes(initializer)) {
+    return true;
+  }
+
+  return isExemptedInitializer(rhsExpression.callee.object, exemptedInitializers);
+};
+
 function getBlockAncestor(node) {
   if (isEndOfBlock(node)) {
     return node;
@@ -59,9 +90,9 @@ function isExportedFunctionDeclaration(identifier) {
   };
 }
 
-function isForStatementVariable(identifier, node) {
+function isForStatementVariable(identifier, node, exemptedInitializers) {
   if (node.type === 'ForStatement') {
-    return isVariableDeclaration(identifier)(node.init);
+    return isVariableDeclaration(identifier, false, exemptedInitializers)(node.init);
   }
 
   return false;
@@ -83,19 +114,16 @@ function getReference(node) {
   }
 }
 
-function isValidInit(rhsExpression, node) {
-  debug('%j', {
-    isObjectExpression: isObjectExpression(rhsExpression),
-    isLiteralExpression: isLiteralExpression(rhsExpression),
-    isScopedVariableRef: (isReference(rhsExpression) && isScopedVariable(getReference(rhsExpression), node.parent)),
-    isConditionalExpressionInit: isConditionalExpression(rhsExpression) && isValidInit(rhsExpression.alternate, node) && isValidInit(rhsExpression.consequent, node),
-  });
-  return isObjectExpression(rhsExpression)
-    || isLiteralExpression(rhsExpression)
-    // TODO Fix 'let a = c(); a = 1;' by ensuring that function c() { return  {} };
+function isValidInit(rhsExpression, node, allowFunctionProps, exemptedInitializers) {
+  return !_.isNil(rhsExpression) && (
+    isLiteral(rhsExpression)
+    || (isNewExpression(rhsExpression) && rhsExpression.callee.name !== 'Object') // In JS, the Object constructor doesnt allocate memory so it is buggy and should be avoided
+    || isExemptedInitializer(rhsExpression, exemptedInitializers)
+    // TODO Replace/Add the following handling for exemptedInitializers by permitting 'let a = c(); a = 1;' by ensuring that function c() { return  {} };
     // isCallExpression(rhsExpression) /* && called Function always returns a ValidInit */ ||
-    || (isReference(rhsExpression) && isScopedVariable(getReference(rhsExpression), node.parent))
-    || (isConditionalExpression(rhsExpression) && isValidInit(rhsExpression.alternate, node) && isValidInit(rhsExpression.consequent, node));
+    || (isReference(rhsExpression) && isScopedVariable(getReference(rhsExpression), node.parent, allowFunctionProps, exemptedInitializers))
+    || (isConditionalExpression(rhsExpression) && isValidInit(rhsExpression.alternate, node, allowFunctionProps, exemptedInitializers) && isValidInit(rhsExpression.consequent, node, allowFunctionProps, exemptedInitializers))
+  );
 }
 
 function getLeftMostObject(arg) {
@@ -129,24 +157,24 @@ function getIdentifierDeclaration(identifier, node) {
   });
 }
 
-function isVariableDeclaration(identifier) {
-  return function (node) { // Todo not sure about this defaulting. seems to fix weird bug
-    const finalNode = node || {};
+function isVariableDeclaration(identifier, allowFunctionProps, exemptedInitializers) {
+  return function (node) {
+    const finalNode = node || {}; // Todo not sure about this defaulting. seems to fix weird bug
 
     if (finalNode.type !== 'VariableDeclaration') {
       return false;
     }
 
     const declaration = getIdentifierDeclaration(identifier, finalNode);
-    debug('%j', {
-      f: 'isVariableDeclaration',
-      nodeType: finalNode.type,
-      declarationType: declaration?.type,
-      isValidInit: isValidInit(_.get('init', declaration), finalNode),
-    });
+    // Debug('%j', {
+    //   f: 'isVariableDeclaration',
+    //   nodeType: finalNode.type,
+    //   declarationType: declaration?.type,
+    //   isValidInit: isValidInit(_.get('init', declaration), finalNode, exemptedInitializers),
+    // });
     return (
       !_.isNil(declaration)
-      && isValidInit(_.get('init', declaration), finalNode)
+      && isValidInit(_.get('init', declaration), finalNode, allowFunctionProps, exemptedInitializers)
     );
   };
 }
@@ -156,31 +184,22 @@ function isLetDeclaration(identifier) {
     const finalNode = node || {};
 
     if (finalNode.type !== 'VariableDeclaration' || finalNode.kind !== 'let') {
-      debug('%j', {f: 'isLetDeclaration', isLetNode: false});
       return false;
     }
 
     const declaration = getIdentifierDeclaration(identifier, finalNode);
-    debug('%j', {
-      f: 'isLetDeclaration',
-      isLetNode: true,
-      nodeType: finalNode?.type,
-      nodeKind: finalNode?.kind,
-      declarationType: declaration?.type,
-    });
     return !_.isNil(declaration);
   };
 }
 
-function isScopedVariableIdentifier(identifier, node, allowFunctionProps) {
+function isScopedVariableIdentifier(identifier, node, allowFunctionProps, exemptedInitializers) {
   if (_.isNil(node)) {
     return false;
   }
 
-  return _.some(isVariableDeclaration(identifier))(node.body)
-    || (allowFunctionProps && isScopedFunctionIdentifier(identifier, node))
+  return _.some(isVariableDeclaration(identifier, allowFunctionProps, exemptedInitializers), node.body)
     || isForStatementVariable(identifier, node)
-    || (!isEndOfBlock(node) && isScopedVariableIdentifier(identifier, node.parent));
+    || (!isEndOfBlock(node) && isScopedVariableIdentifier(identifier, node.parent, allowFunctionProps, exemptedInitializers));
 }
 
 function isScopedLetIdentifier(identifier, node) {
@@ -188,13 +207,6 @@ function isScopedLetIdentifier(identifier, node) {
     return false;
   }
 
-  debug('%j', {
-    f: 'isScopedLetIdentifier',
-    identifier,
-    isNilNode: false,
-    isLetDeclaration: _.some(isLetDeclaration(identifier))(node.body),
-    isScopedLetIdentifier: !isEndOfBlock(node) && isScopedLetIdentifier(identifier, node.parent),
-  });
   return _.some(isLetDeclaration(identifier))(node.body)
     || (!isEndOfBlock(node) && isScopedLetIdentifier(identifier, node.parent));
 }
@@ -204,15 +216,17 @@ function isScopedLetVariableAssignment(node) {
     return false;
   }
 
-  debug('%j', {f: 'isScopedLetVariableAssignment', isAssignment: true});
   const identifier = _.get('name')(getLeftMostObject(node.left));
   return isScopedLetIdentifier(identifier, node.parent);
 }
 
-function isScopedVariable(arg, node, allowFunctionProps) {
+function isScopedVariable(arg, node, allowFunctionProps, exemptedInitializers) {
   const identifier = _.get('name')(getLeftMostObject(arg));
-  debug('%j', {f: 'isScopedVariable', identifier});
-  return isScopedVariableIdentifier(identifier, node, allowFunctionProps);
+  if (!identifier) {
+    return false;
+  }
+
+  return (allowFunctionProps && isScopedFunctionIdentifier(identifier, node)) || isScopedVariableIdentifier(identifier, node, allowFunctionProps, exemptedInitializers);
 }
 
 function isScopedFunctionIdentifier(identifier, node) {
@@ -232,20 +246,17 @@ function isScopedFunction(arg, node) {
 }
 
 function isExemptedReducer(exemptedReducerCallees, node) {
-  debug('isExemptedReducer');
   const endOfBlockNode = getBlockAncestor(node);
   const callee = _.get('parent.callee', endOfBlockNode);
   return callee && _.includes(_.getOr(_.get('name', callee), 'property.name', callee), exemptedReducerCallees);
 }
 
 module.exports = {
-  isReference,
-  isObjectExpression,
-  isLiteralExpression,
+  isExemptedReducer,
   isFunctionExpression,
-  isConditionalExpression,
-  isScopedVariable,
+  isObjectExpression,
   isScopedLetVariableAssignment,
   isScopedFunction,
-  isExemptedReducer,
+  isScopedVariable,
+  isValidInit,
 };
