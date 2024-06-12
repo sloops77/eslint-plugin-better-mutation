@@ -79,7 +79,7 @@ const create = function (context) {
       if (isMutatingFunction(node.callee) && !isAllowedFirstArgument(node.arguments[0], node, allowFunctionProps) && !isExemptedReducer(exemptedReducerCallees, node.parent)) {
         context.report({
           node,
-          message: 'Unallowed use of mutating functions',
+          messageId: 'unsafeMutatingFunction',
         });
       }
     },
@@ -89,6 +89,7 @@ const create = function (context) {
 module.exports = {
   create,
   meta: {
+    type: 'problem',
     schema: [{
       type: 'object',
       properties: {
@@ -112,8 +113,11 @@ module.exports = {
       },
     }],
     docs: {
-      description: 'Forbid the use of [`Object.assign()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/assign) with a variable as first argument.',
+      description: 'disallow unsafe mutating functions such as Object.assign',
       recommended: 'error',
+    },
+    messages: {
+      unsafeMutatingFunction: 'Unsafe mutating functions are disallowed',
     },
   },
 };

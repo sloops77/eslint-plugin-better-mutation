@@ -14,11 +14,11 @@ const ruleTester = avaRuleTester(test, {
 const error = message => ({
   message,
 });
-const reassignmentError = error('Unallowed reassignment');
-const incrementError = error('Unallowed use of `++` operator');
-const decrementError = error('Unallowed use of `--` operator');
-const commonJsError = error('Unallowed reassignment. You may want to activate the `commonjs` option for this rule');
-const prototypesError = error('Unallowed reassignment. You may want to activate the `prototypes` option for this rule');
+const reassignmentError = error('Reassignment is disallowed');
+const incrementError = error('Use of `++` operator is disallowed');
+const decrementError = error('Use of `--` operator is disallowed');
+const commonJsError = error('Assignment to exports or module.exports is disallowed. You may want to activate the `commonjs` option for this rule');
+const prototypesError = error('Assignment to object prototype is disallowed. You may want to activate the `prototypes` option for this rule');
 
 ruleTester.run('no-mutation', rule, {
   valid: [

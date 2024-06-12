@@ -58,32 +58,10 @@ const isCommonJsExport = _.flow(
 );
 
 const ERROR_TYPES = {
-  COMMON_JS: 'COMMON_JS',
-  PROTOTYPE: 'PROTOTYPE',
-  REGULAR: 'REGULAR',
+  COMMON_JS: 'commonjsAssignmentError',
+  PROTOTYPE: 'prototypeAssignmentError',
+  REGULAR: 'reassignmentError',
 };
-
-function errorMessage(errorType) {
-  const baseMessage = 'Unallowed reassignment';
-  let extraInfo = '';
-  switch (errorType) {
-    case ERROR_TYPES.COMMON_JS: {
-      extraInfo = '. You may want to activate the `commonjs` option for this rule';
-      break;
-    }
-
-    case ERROR_TYPES.PROTOTYPE: {
-      extraInfo = '. You may want to activate the `prototypes` option for this rule';
-      break;
-    }
-
-    default: {
-      break;
-    }
-  }
-
-  return baseMessage + extraInfo;
-}
 
 function makeException(exception) {
   if (!exception.object && !exception.property) {
@@ -128,10 +106,10 @@ const create = function (context) {
   return {
     AssignmentExpression(node) {
       const isCommonJs = isCommonJsExport(node);
-      const isPrototypeAss = isPrototypeAssignment(node);
+      const isPrototype = isPrototypeAssignment(node);
 
       if ((isCommonJs && acceptCommonJs)
-        || (isPrototypeAss && acceptPrototypes)
+        || (isPrototype && acceptPrototypes)
         || isExemptedIdentifier(exemptedIdentifiers, node.left)
         || isScopedLetVariableAssignment(node)
         || isScopedVariable(node.left, node.parent, allowFunctionProps, exemptedInitializers)
@@ -142,73 +120,81 @@ const create = function (context) {
       let errorType = ERROR_TYPES.REGULAR;
       if (isCommonJs) {
         errorType = ERROR_TYPES.COMMON_JS;
-      } else if (isPrototypeAss) {
+      } else if (isPrototype) {
         errorType = ERROR_TYPES.PROTOTYPE;
       }
 
       context.report({
         node,
-        message: errorMessage(errorType),
+        messageId: errorType,
       });
     },
     UpdateExpression(node) {
       context.report({
         node,
-        message: `Unallowed use of \`${node.operator}\` operator`,
+        messageId: 'unsafeMutatingOperator',
+        data: {
+          operator: node.operator,
+        },
       });
     },
   };
 };
 
-const schema = [{
-  type: 'object',
-  properties: {
-    commonjs: {
-      type: 'boolean',
-    },
-    allowThis: {
-      type: 'boolean',
-    },
-    prototypes: {
-      type: 'boolean',
-    },
-    functionProps: {
-      type: 'boolean',
-    },
-    exceptions: {
-      type: 'array',
-      items: {
-        type: 'object',
-        properties: {
-          object: {
-            type: 'string',
-          },
-          property: {
-            type: 'string',
-          },
-        },
-      },
-    },
-    reducers: {
-      type: 'array',
-      items: {type: 'string'},
-      default: defaultReducers,
-    },
-    initializers: {
-      type: 'array',
-      items: {type: 'string'},
-      default: defaultInitializers,
-    },
-  },
-}];
-
 module.exports = {
   create,
   meta: {
-    schema,
+    type: 'problem',
+    schema: [{
+      type: 'object',
+      properties: {
+        commonjs: {
+          type: 'boolean',
+        },
+        allowThis: {
+          type: 'boolean',
+        },
+        prototypes: {
+          type: 'boolean',
+        },
+        functionProps: {
+          type: 'boolean',
+        },
+        exceptions: {
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: {
+              object: {
+                type: 'string',
+              },
+              property: {
+                type: 'string',
+              },
+            },
+          },
+        },
+        reducers: {
+          type: 'array',
+          items: {type: 'string'},
+          default: defaultReducers,
+        },
+        initializers: {
+          type: 'array',
+          items: {type: 'string'},
+          default: defaultInitializers,
+        },
+      },
+    }],
     docs: {
-      description: 'Forbid the use of mutating operators.',
+      description: 'disallow mutating operators.',
       recommended: 'error',
+    },
+    messages: {
+      unsafeMutatingOperator: 'Use of `{{ operator }}` operator is disallowed',
+      [ERROR_TYPES.REGULAR]: 'Reassignment is disallowed',
+      [ERROR_TYPES.COMMON_JS]: 'Assignment to exports or module.exports is disallowed. You may want to activate the `commonjs` option for this rule',
+      [ERROR_TYPES.PROTOTYPE]: 'Assignment to object prototype is disallowed. You may want to activate the `prototypes` option for this rule',
     },
   },
 
