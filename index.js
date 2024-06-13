@@ -19,7 +19,7 @@ const internalRecommendedRules = createIndex.createConfig({
 const plugin = {
   meta: {
     name: packageJson.name,
-    version: packageJson.version
+    version: packageJson.version,
   },
   rules,
   configs: {
