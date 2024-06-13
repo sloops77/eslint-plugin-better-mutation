@@ -2,6 +2,7 @@
 
 const importModules = require('import-modules');
 const createIndex = require('create-eslint-index');
+const packageJson = require('./package.json');
 const defaults = require('./rules/utils/defaults');
 
 const rules = importModules('rules', {camelize: false});
@@ -17,7 +18,8 @@ const internalRecommendedRules = createIndex.createConfig({
 
 const plugin = {
   meta: {
-    name: 'eslint-plugin-better-mutation',
+    name: packageJson.name,
+    version: packageJson.version
   },
   rules,
   configs: {
