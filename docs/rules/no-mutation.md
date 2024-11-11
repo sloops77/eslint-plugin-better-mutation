@@ -39,7 +39,7 @@ const { defaults: { defaultReducers, defaultInitializers } } = require('eslint-b
 module.exports = {
   "eslintConfig": {
       "rules": {
-          "better-migration/no-mutation": ["error", {
+          "better-mutation/no-mutation": ["error", {
             "commonjs": true,
             "allowThis": true,
             "exceptions": [
@@ -71,13 +71,13 @@ let a = 1; a = 2;
 
 function foo(a={}) {}
 
-/* eslint better-migration/no-mutation: ["error", {"commonjs": true}] */
+/* eslint better-mutation/no-mutation: ["error", {"commonjs": true}] */
 exports = {};
 exports.foo = {};
 module.exports = {};
 module.exports.foo = {};
 
-/* eslint better-migration/no-mutation: ["error", {"exceptions": [{"property": "propTypes"}]}] */
+/* eslint better-mutation/no-mutation: ["error", {"exceptions": [{"property": "propTypes"}]}] */
 function Component(props) {
   // ...
 }
@@ -86,15 +86,15 @@ Component.propTypes = {
   // ...
 };
 
-/* eslint better-migration/no-mutation: ["error", {"allowThis": true}] */
+/* eslint better-mutation/no-mutation: ["error", {"allowThis": true}] */
 function foo(a) {
   this.a = a || {};
 }
 
-/* eslint better-migration/no-mutation: ["error", {"reducers": [...defaultReducers, "fold"}] */
+/* eslint better-mutation/no-mutation: ["error", {"reducers": [...defaultReducers, "fold"}] */
 const sum = fold((acc, num) => acc += num, 0, [1, 2, 3]);
 
-/* eslint better-migration/no-mutation: ["error", {"initializers": [...defaultInitializers, "MyObject.init"}] */
+/* eslint better-mutation/no-mutation: ["error", {"initializers": [...defaultInitializers, "MyObject.init"}] */
 const x = MyObject.init(42);
 x.foo = "bar"
 ```

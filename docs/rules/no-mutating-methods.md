@@ -36,8 +36,8 @@ const { defaults: { defaultReducers, defaultInitializers } } = require('eslint-b
 module.exports = {
   "eslintConfig": {
     "rules": {
-      "better-migration/no-mutating-methods": ["error", {
-        "allowedObjects": ['_', 'R', 'fp'], 
+      "better-mutation/no-mutating-methods": ["error", {
+        "allowedObjects": ['_', 'R', 'fp'],
         "reducers": [...defaultReducers, 'transform'],
         "initializers": [
           ...defaultInitializers,
