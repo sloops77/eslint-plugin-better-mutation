@@ -43,7 +43,7 @@
   ],
   "dependencies": {
     "create-eslint-index": "~1.0.0",
-    "debug": "~4.3.5",
+    "debug": "~4.4.0",
     "eslint-ast-utils": "~1.1.0",
     "import-modules": "~3.2.0",
     "lodash": "~4.17.21"
