@@ -62,6 +62,13 @@ ruleTester.run('no-mutating-methods', rule, {
     'const myObject = {a: 1, b:2}; Object.keys(myObject).sort(mySortFn)',
     'const myObject = {a: 1, b:2}; Object.keys(myObject).sort(mySortFn).reverse()',
     'const myObject = {a: 1, b:2}; structuredClone(myObject).sort(mySortFn).reverse()',
+    `const arr = [];
+    for (const foo of foos) {
+      const [, ...rest] = foo.bars;
+      for (const elem of rest) {
+        arr.push(elem);
+      }
+    }`
   ],
   invalid: [
     {
