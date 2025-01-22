@@ -150,7 +150,7 @@ function getIdentifierDeclaration(identifier, node) {
 
     if (_.get('type', id) === 'ArrayPattern') {
       const destructuredElements = _.get('elements', id) || [];
-      return _.find(element => element.name === identifier || (element.type === 'RestElement' && element.argument?.name === identifier), destructuredElements);
+      return _.find(element => element?.name === identifier || (element?.type === 'RestElement' && element.argument?.name === identifier), destructuredElements);
     }
 
     return _.get('name', id) === identifier;
