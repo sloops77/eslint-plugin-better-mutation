@@ -1,6 +1,6 @@
 {
   "name": "eslint-plugin-better-mutation",
-  "version": "1.5.0",
+  "version": "1.6.0",
   "description": "ESLint rules for controlling where and how mutation is used.",
   "license": "MIT",
   "repository": "sloops77/eslint-plugin-better-mutation",
