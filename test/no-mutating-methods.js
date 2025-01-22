@@ -68,7 +68,7 @@ ruleTester.run('no-mutating-methods', rule, {
       for (const elem of rest) {
         arr.push(elem);
       }
-    }`
+    }`,
   ],
   invalid: [
     {
