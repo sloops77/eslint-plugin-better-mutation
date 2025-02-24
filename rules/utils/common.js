@@ -259,9 +259,9 @@ function isExemptedReducer(exemptedReducerCallees, node) {
  * @author Brody McKee (github.com/mrmckeb)
  */
 function isForStatementUpdate(node) {
-  const parent = node.parent;
+  const {parent} = node;
 
-  return parent.type === "ForStatement" && parent.update === node;
+  return parent.type === 'ForStatement' && parent.update === node;
 }
 
 /**
@@ -277,10 +277,10 @@ function isForStatementUpdate(node) {
  * @author Brody McKee (github.com/mrmckeb)
  */
 function isForLoopAfterthought(node) {
-  const parent = node.parent;
+  const {parent} = node;
 
-  if (parent.type === "SequenceExpression") {
-      return isForLoopAfterthought(parent);
+  if (parent.type === 'SequenceExpression') {
+    return isForLoopAfterthought(parent);
   }
 
   return isForStatementUpdate(node);

@@ -133,6 +133,7 @@ const create = function (context) {
       if (options.allowUnaryOperatorInForLoops && isForLoopAfterthought(node)) {
         return;
       }
+
       context.report({
         node,
         messageId: 'unsafeMutatingOperator',
