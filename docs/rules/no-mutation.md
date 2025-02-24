@@ -10,6 +10,8 @@ This rule supports the following options:
 
 `allowThis`: If set to `true`, then this rule will not report when assigning to or to a (sub-) property of `this`.
 
+`allowUnaryOperatorInForLoops`: If set to `true`, then this rule will not report increment/decrement operations in the update statement of a `for` loop
+
 `exceptions`: List of objects that describe exceptions to the rule. Each exception should have either or both `object` and `property` field set.
 
 `prototypes`: If set to `true`, then this rule will permit assignment to the `prototype` of an object.
