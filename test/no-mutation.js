@@ -165,6 +165,22 @@ ruleTester.run('no-mutation', rule, {
       code: 'const x = MyObject.init(42); x.foo += 1',
       options: [{initializers: ['MyObject.init']}],
     },
+    {
+      code: 'for(let i = 0; i < 0; i++){}',
+      options: [{allowUnaryOperatorInForLoops: true}],
+    },
+    {
+      code: 'for(let i = 0; i < 0; ++i){}',
+      options: [{allowUnaryOperatorInForLoops: true}],
+    },
+    {
+      code: 'for(let i = 3; i > 0; i--){}',
+      options: [{allowUnaryOperatorInForLoops: true}],
+    },
+    {
+      code: 'for(let i = 3; i > 0; --i){}',
+      options: [{allowUnaryOperatorInForLoops: true}],
+    },
   ],
   invalid: [
     {
@@ -217,6 +233,26 @@ ruleTester.run('no-mutation', rule, {
     },
     {
       code: '--a;',
+      errors: [decrementError],
+    },
+    {
+      code: 'for(let i = 0; ++i < 3; ){}',
+      options: [{allowUnaryOperatorInForLoops: true}],
+      errors: [incrementError],
+    },
+    {
+      code: 'for(let i = 0; i++ < 3; ){}',
+      options: [{allowUnaryOperatorInForLoops: true}],
+      errors: [incrementError],
+    },
+    {
+      code: 'for(let i = 3; --i > 0; ){}',
+      options: [{allowUnaryOperatorInForLoops: true}],
+      errors: [decrementError],
+    },
+    {
+      code: 'for(let i = 3; i-- > 0; ){}',
+      options: [{allowUnaryOperatorInForLoops: true}],
       errors: [decrementError],
     },
     {

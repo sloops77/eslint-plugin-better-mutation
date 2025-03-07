@@ -251,6 +251,41 @@ function isExemptedReducer(exemptedReducerCallees, node) {
   return callee && _.includes(_.getOr(_.get('name', callee), 'property.name', callee), exemptedReducerCallees);
 }
 
+/**
+ * Determines whether the given node is the update node of a `ForStatement`.
+ * @param {ASTNode} node The node to check.
+ * @returns {boolean} `true` if the node is `ForStatement` update.
+ * @author Ian Christian Myers
+ * @author Brody McKee (github.com/mrmckeb)
+ */
+function isForStatementUpdate(node) {
+  const {parent} = node;
+
+  return parent.type === 'ForStatement' && parent.update === node;
+}
+
+/**
+ * Determines whether the given node is considered to be a for loop "afterthought" by the logic of this rule.
+ * In particular, it returns `true` if the given node is either:
+ *   - The update node of a `ForStatement`: for (;; i++) {}
+ *   - An operand of a sequence expression that is the update node: for (;; foo(), i++) {}
+ *   - An operand of a sequence expression that is child of another sequence expression, etc.,
+ *     up to the sequence expression that is the update node: for (;; foo(), (bar(), (baz(), i++))) {}
+ * @param {ASTNode} node The node to check.
+ * @returns {boolean} `true` if the node is a for loop afterthought.
+ * @author Ian Christian Myers
+ * @author Brody McKee (github.com/mrmckeb)
+ */
+function isForLoopAfterthought(node) {
+  const {parent} = node;
+
+  if (parent.type === 'SequenceExpression') {
+    return isForLoopAfterthought(parent);
+  }
+
+  return isForStatementUpdate(node);
+}
+
 module.exports = {
   isExemptedReducer,
   isFunctionExpression,
@@ -259,4 +294,5 @@ module.exports = {
   isScopedFunction,
   isScopedVariable,
   isValidInit,
+  isForLoopAfterthought,
 };

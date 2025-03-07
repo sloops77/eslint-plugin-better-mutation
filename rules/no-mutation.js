@@ -1,7 +1,7 @@
 'use strict';
 
 const _ = require('lodash/fp');
-const {isScopedVariable, isScopedFunction, isExemptedReducer, isScopedLetVariableAssignment} = require('./utils/common');
+const {isScopedVariable, isScopedFunction, isExemptedReducer, isScopedLetVariableAssignment, isForLoopAfterthought} = require('./utils/common');
 const {defaultReducers, defaultInitializers} = require('./utils/defaults');
 
 const isModuleExports = _.matches({
@@ -130,6 +130,10 @@ const create = function (context) {
       });
     },
     UpdateExpression(node) {
+      if (options.allowUnaryOperatorInForLoops && isForLoopAfterthought(node)) {
+        return;
+      }
+
       context.report({
         node,
         messageId: 'unsafeMutatingOperator',
@@ -152,6 +156,9 @@ module.exports = {
           type: 'boolean',
         },
         allowThis: {
+          type: 'boolean',
+        },
+        allowUnaryOperatorInForLoops: {
           type: 'boolean',
         },
         prototypes: {
