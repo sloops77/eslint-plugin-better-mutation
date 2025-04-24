@@ -1,12 +1,10 @@
 const test = require('ava');
-const avaRuleTester = require('eslint-ava-rule-tester');
+const AvaRuleTester = require('eslint-ava-rule-tester').default;
 const rule = require('../rules/no-mutation');
 
-const ruleTester = avaRuleTester(test, {
-  env: {
-    es2020: true,
-  },
-  parserOptions: {
+const ruleTester = new AvaRuleTester(test, {
+  languageOptions: {
+    ecmaVersion: 2024,
     sourceType: 'module',
   },
 });
