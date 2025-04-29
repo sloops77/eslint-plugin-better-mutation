@@ -106,8 +106,8 @@ $ npm install --save-dev eslint eslint-plugin-better-mutation
 
 ## Usage
 
-### For flat config (Eslint 9.x and above)
-In an js file
+### For flat config (Eslint 8.x and above)
+In a js file
 
 ```js
 // eslint.config.mjs
@@ -118,15 +118,10 @@ export default [
   {
     name: "my-awesome-project",
     plugins: {
-      'better-mutation': pluginBetterMutation,
-      // ... other plugins
+      "better-mutation": pluginBetterMutation,
     },
-    rules: [
-      ...pluginBetterMutation.configs.recommended.rules,
-      // ... other plugins and rules
-    ]
+    extends: ["better-mutation/recommended"]
   },
-  // ...
 ]; 
 ```
 
@@ -135,13 +130,10 @@ export default [
 Configure it in `.eslintrc` or package.json.
 ```json
 {
-  "name": "my-awesome-project",
-  "eslintConfig": {
-    "plugins": [
-      "better-mutation"
-    ],
-    "extends": "plugin:better-mutation/recommended"
-  }
+  "plugins": [
+    "better-mutation"
+  ],
+  "extends": "plugin:better-mutation/recommended"
 }
 ```
 <!-- EXAMPLE_CONFIGURATION:END -->
@@ -151,19 +143,15 @@ Advanced configuration enables setting individual rule configuration.
 
 ```js
 export default {
-  "name": "my-awesome-project",
-  "eslintConfig": {
-    // ... other config
-    "plugins": [
-      "better-mutation"
-      // ... other plugins
-    ],
-    "rules": {
-      "better-mutation/no-mutating-functions": "error",
-      "better-mutation/no-mutating-methods": "error",
-      "better-mutation/no-mutation": "error"
-      // ... other rules
-    }
+  // ... other config
+  plugins: {
+    "better-mutation": pluginBetterMutation,
+  },
+  "rules": {
+    "better-mutation/no-mutating-functions": "error",
+    "better-mutation/no-mutating-methods": "error",
+    "better-mutation/no-mutation": "error"
+    // ... other rules
   }
 }
 ```
