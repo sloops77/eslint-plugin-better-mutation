@@ -65,7 +65,7 @@ const isExemptedInitializer = (rhsExpression, exemptedInitializers) => {
   }
 
   const initializer = buildInitializer(rhsExpression.callee);
-  if (exemptedInitializers.includes(initializer)) {
+  if (exemptedInitializers?.includes(initializer)) {
     return true;
   }
 
