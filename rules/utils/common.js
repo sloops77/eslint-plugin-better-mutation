@@ -288,6 +288,7 @@ function isForLoopAfterthought(node) {
 
 module.exports = {
   isExemptedReducer,
+  isExemptedInitializer,
   isFunctionExpression,
   isObjectExpression,
   isScopedLetVariableAssignment,
