@@ -2224,10 +2224,10 @@ eslint-plugin-import@~2.27.5:
     semver "^6.3.0"
     tsconfig-paths "^3.14.1"
 
-eslint-plugin-n@17.17.0:
-  version "17.17.0"
-  resolved "https://registry.yarnpkg.com/eslint-plugin-n/-/eslint-plugin-n-17.17.0.tgz#6644433d395c2ecae0b2fe58018807e85d8e0724"
-  integrity sha512-2VvPK7Mo73z1rDFb6pTvkH6kFibAmnTubFq5l83vePxu0WiY1s0LOtj2WHb6Sa40R3w4mnh8GFYbHBQyMlotKw==
+eslint-plugin-n@17.18.0:
+  version "17.18.0"
+  resolved "https://registry.yarnpkg.com/eslint-plugin-n/-/eslint-plugin-n-17.18.0.tgz#8515979b49ef8db7bb16e457b8ed22cc695d2a84"
+  integrity sha512-hvZ/HusueqTJ7VDLoCpjN0hx4N4+jHIWTXD4TMLHy9F23XkDagR9v+xQWRWR57yY55GPF8NnD4ox9iGTxirY8A==
   dependencies:
     "@eslint-community/eslint-utils" "^4.5.0"
     enhanced-resolve "^5.17.1"
@@ -2930,17 +2930,10 @@ get-symbol-description@^1.1.0:
     es-errors "^1.3.0"
     get-intrinsic "^1.2.6"
 
-get-tsconfig@^4.6.2, get-tsconfig@^4.7.0:
+get-tsconfig@^4.6.2, get-tsconfig@^4.7.0, get-tsconfig@^4.8.1:
   version "4.10.0"
   resolved "https://registry.yarnpkg.com/get-tsconfig/-/get-tsconfig-4.10.0.tgz#403a682b373a823612475a4c2928c7326fc0f6bb"
   integrity sha512-kGzZ3LWWQcGIAmg6iWvXn0ei6WDtV26wzHRMwDSzmAbcXrTEXxHy6IehI6/4eT6VRKyMP1eF1VqwrVUmE/LR7A==
-  dependencies:
-    resolve-pkg-maps "^1.0.0"
-
-get-tsconfig@^4.8.1:
-  version "4.8.1"
-  resolved "https://registry.yarnpkg.com/get-tsconfig/-/get-tsconfig-4.8.1.tgz#8995eb391ae6e1638d251118c7b56de7eb425471"
-  integrity sha512-k9PN+cFBmaLWtVz29SkUoqU5O0slLuHJXt/2P+tMVFT+phsSGXGkp9t3rQIqdz0e+06EHNGs3oM6ZX1s2zHxRg==
   dependencies:
     resolve-pkg-maps "^1.0.0"
 
@@ -3391,19 +3384,12 @@ is-callable@^1.1.3, is-callable@^1.1.4, is-callable@^1.2.7:
   resolved "https://registry.yarnpkg.com/is-callable/-/is-callable-1.2.7.tgz#3bc2a85ea742d9e36205dcacdd72ca1fdc51b055"
   integrity sha512-1BC0BVFhS/p0qtw6enp8e+8OD0UrK0oFLztSjNzhcKA3WDuJxxAPXzPuPtKkjEY9UUoEWlX/8fgKeu2S8i9JTA==
 
-is-core-module@^2.11.0, is-core-module@^2.12.1, is-core-module@^2.15.1, is-core-module@^2.16.0:
+is-core-module@^2.11.0, is-core-module@^2.12.1, is-core-module@^2.13.0, is-core-module@^2.15.1, is-core-module@^2.16.0:
   version "2.16.1"
   resolved "https://registry.yarnpkg.com/is-core-module/-/is-core-module-2.16.1.tgz#2a98801a849f43e2add644fbb6bc6229b19a4ef4"
   integrity sha512-UfoeMA6fIJ8wTYFEUjelnaGI67v6+N7qXJEvQuIGa99l4xsCruSYOVSQ0uPANn4dAzm8lkYPaKLrrijLq7x23w==
   dependencies:
     hasown "^2.0.2"
-
-is-core-module@^2.13.0:
-  version "2.13.1"
-  resolved "https://registry.yarnpkg.com/is-core-module/-/is-core-module-2.13.1.tgz#ad0d7532c6fea9da1ebdc82742d74525c6273384"
-  integrity sha512-hHrIjvZsftOsvKSn2TRYl63zvxsgE0K+0mYMoH6gD4omR5IWB2KynivBQczo3+wF1cCkjzvptnI9Q0sPU66ilw==
-  dependencies:
-    hasown "^2.0.0"
 
 is-data-view@^1.0.1:
   version "1.0.1"
@@ -4913,21 +4899,12 @@ resolve-pkg-maps@^1.0.0:
   resolved "https://registry.yarnpkg.com/resolve-pkg-maps/-/resolve-pkg-maps-1.0.0.tgz#616b3dc2c57056b5588c31cdf4b3d64db133720f"
   integrity sha512-seS2Tj26TBVOC2NIc2rOe2y2ZO7efxITtLZcGSOnHHNOQ7CkiUBfw0Iw2ck6xkIhPwLhKNLS8BO+hEpngQlqzw==
 
-resolve@^1.10.0, resolve@^1.22.1, resolve@^1.22.2:
+resolve@^1.10.0, resolve@^1.22.1, resolve@^1.22.2, resolve@^1.22.4:
   version "1.22.10"
   resolved "https://registry.yarnpkg.com/resolve/-/resolve-1.22.10.tgz#b663e83ffb09bbf2386944736baae803029b8b39"
   integrity sha512-NPRy+/ncIMeDlTAsuqwKIiferiawhefFJtkNSW0qZJEqMEb+qBt/77B/jGeeek+F0uOeN05CDa6HXbbIgtVX4w==
   dependencies:
     is-core-module "^2.16.0"
-    path-parse "^1.0.7"
-    supports-preserve-symlinks-flag "^1.0.0"
-
-resolve@^1.22.4:
-  version "1.22.8"
-  resolved "https://registry.yarnpkg.com/resolve/-/resolve-1.22.8.tgz#b6c87a9f2aa06dfab52e3d70ac8cde321fa5a48d"
-  integrity sha512-oKWePCxqpd6FlLvGV1VU0x7bkPmmCNolxzjMf4NczoDnQcIWrAF+cPtZn5i6n+RfD2d9i0tzpKnG6Yk168yIyw==
-  dependencies:
-    is-core-module "^2.13.0"
     path-parse "^1.0.7"
     supports-preserve-symlinks-flag "^1.0.0"
 
