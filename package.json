@@ -51,7 +51,7 @@
   "devDependencies": {
     "@ava/babel": "^2.0.0",
     "ava": "~6.3.0",
-    "eslint": "9.26.0",
+    "eslint": "9.28.0",
     "eslint-ava-rule-tester": "5.0.1",
     "eslint-plugin-eslint-plugin": "6.4.0",
     "eslint-plugin-n": "17.18.0",
