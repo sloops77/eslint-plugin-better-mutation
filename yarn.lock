@@ -917,10 +917,10 @@ acorn-walk@^8.3.4:
   dependencies:
     acorn "^8.11.0"
 
-acorn@^8.11.0, acorn@^8.14.0, acorn@^8.14.1, acorn@^8.6.0, acorn@^8.9.0:
-  version "8.14.1"
-  resolved "https://registry.yarnpkg.com/acorn/-/acorn-8.14.1.tgz#721d5dc10f7d5b5609a891773d47731796935dfb"
-  integrity sha512-OvQ/2pUDKmgfCg++xsTX1wGxfTaszcHVcTctW4UJB4hibJx2HXxxO5UmVgyjMa+ZDsiaf5wWLXYpRWMmBI0QHg==
+acorn@^8.11.0, acorn@^8.14.0, acorn@^8.15.0, acorn@^8.6.0, acorn@^8.9.0:
+  version "8.15.0"
+  resolved "https://registry.yarnpkg.com/acorn/-/acorn-8.15.0.tgz#a360898bc415edaac46c8241f6383975b930b816"
+  integrity sha512-NZyJarBfL7nWwIq+FDL6Zp/yHEhePMNnnJ0y3qfieCrmNvYct8uvtiV41UvlSe6apAfk0fY1FbWx+NwfmpvtTg==
 
 agent-base@^7.1.2:
   version "7.1.3"
@@ -1111,21 +1111,21 @@ async-sema@^3.1.1:
   integrity sha512-tLRNUXati5MFePdAk8dw7Qt7DpxPB60ofAgn8WRhW6a2rcimZnYBP9oxHiv0OHy+Wz7kPMG+t4LGdt31+4EmGg==
 
 ava@~6.4.0:
-  version "6.4.0"
-  resolved "https://registry.yarnpkg.com/ava/-/ava-6.4.0.tgz#5c4416ce47715ea0c3ee93e723bc97dfee4106c3"
-  integrity sha512-aeFapuBZtaGwVMlFFf074SZJ0bPcdmAdJdsvhHMp+XaOnC2DgeMzopb7yyYAhulNGRJQfUK/SIBYo2PoX7+gtw==
+  version "6.4.1"
+  resolved "https://registry.yarnpkg.com/ava/-/ava-6.4.1.tgz#89ce905d73bcd6c1d55bbba2598df3dc74e957dd"
+  integrity sha512-vxmPbi1gZx9zhAjHBgw81w/iEDKcrokeRk/fqDTyA2DQygZ0o+dUGRHFOtX8RA5N0heGJTTsIk7+xYxitDb61Q==
   dependencies:
     "@vercel/nft" "^0.29.4"
-    acorn "^8.14.1"
+    acorn "^8.15.0"
     acorn-walk "^8.3.4"
     ansi-styles "^6.2.1"
     arrgv "^1.0.2"
     arrify "^3.0.0"
     callsites "^4.2.0"
-    cbor "^10.0.3"
+    cbor "^10.0.9"
     chalk "^5.4.1"
     chunkd "^2.0.1"
-    ci-info "^4.2.0"
+    ci-info "^4.3.0"
     ci-parallel-vars "^1.0.1"
     cli-truncate "^4.0.0"
     code-excerpt "^4.0.0"
@@ -1133,7 +1133,7 @@ ava@~6.4.0:
     concordance "^5.0.4"
     currently-unhandled "^0.4.1"
     debug "^4.4.1"
-    emittery "^1.1.0"
+    emittery "^1.2.0"
     figures "^6.1.0"
     globby "^14.1.0"
     ignore-by-default "^2.1.0"
@@ -1344,10 +1344,10 @@ caniuse-lite@^1.0.30001587:
   resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30001626.tgz#328623664a28493b4a9019af7ce03ea39fbe898c"
   integrity sha512-JRW7kAH8PFJzoPCJhLSHgDgKg5348hsQ68aqb+slnzuB5QFERv846oA/mRChmlLAOdEDeOkRn3ynb1gSFnjt3w==
 
-cbor@^10.0.3:
-  version "10.0.3"
-  resolved "https://registry.yarnpkg.com/cbor/-/cbor-10.0.3.tgz#202d79cd696f408700af51b0c9771577048a860e"
-  integrity sha512-72Jnj81xMsqepqdcSdf2+fflz/UDsThOHy5hj2MW5F5xzHL8Oa0KQ6I6V9CwVUPxg5pf+W9xp6W2KilaRXWWtw==
+cbor@^10.0.9:
+  version "10.0.9"
+  resolved "https://registry.yarnpkg.com/cbor/-/cbor-10.0.9.tgz#a0ef66aac57cf176e928bdc70d37ae305f2db2f8"
+  integrity sha512-KEWYehb/vJkRmigctVQLsz73Us2RNnITo/wOwQV5AtZpLGH1r2PPlsNHdsX460YuHZCyhLklbYzAOuJfOeg34Q==
   dependencies:
     nofilter "^3.0.2"
 
@@ -1388,10 +1388,10 @@ ci-info@^3.8.0:
   resolved "https://registry.yarnpkg.com/ci-info/-/ci-info-3.9.0.tgz#4279a62028a7b1f262f3473fc9605f5e218c59b4"
   integrity sha512-NIxF55hv4nSqQswkAeiOi1r83xy8JldOFDTWiug55KBu9Jnblncd2U6ViHmYgHf01TPZS77NJBhBMKdWj9HQMQ==
 
-ci-info@^4.2.0:
-  version "4.2.0"
-  resolved "https://registry.yarnpkg.com/ci-info/-/ci-info-4.2.0.tgz#cbd21386152ebfe1d56f280a3b5feccbd96764c7"
-  integrity sha512-cYY9mypksY8NRqgDB1XD1RiJL338v/551niynFTGkZOO2LHuB2OmOYxDIe/ttN9AHwrqdum1360G3ald0W9kCg==
+ci-info@^4.3.0:
+  version "4.3.0"
+  resolved "https://registry.yarnpkg.com/ci-info/-/ci-info-4.3.0.tgz#c39b1013f8fdbd28cd78e62318357d02da160cd7"
+  integrity sha512-l+2bNRMiQgcfILUi33labAZYIWlH1kWDp+ecNo5iisRKrbm0xcRyCww71/YU0Fkw0mAFpz9bJayXPjey6vkmaQ==
 
 ci-parallel-vars@^1.0.1:
   version "1.0.1"
@@ -1793,10 +1793,10 @@ electron-to-chromium@^1.4.668:
   resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.4.788.tgz#a3545959d5cfa0a266d3e551386c040be34e7e06"
   integrity sha512-ubp5+Ev/VV8KuRoWnfP2QF2Bg+O2ZFdb49DiiNbz2VmgkIqrnyYaqIOqj8A6K/3p1xV0QcU5hBQ1+BmB6ot1OA==
 
-emittery@^1.1.0:
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/emittery/-/emittery-1.1.0.tgz#7b5a00ec9a315fa9bfabeba0673920a1bb385f1b"
-  integrity sha512-rsX7ktqARv/6UQDgMaLfIqUWAEzzbCQiVh7V9rhDXp6c37yoJcks12NVD+XPkgl4AEavmNhVfrhGoqYwIsMYYA==
+emittery@^1.2.0:
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/emittery/-/emittery-1.2.0.tgz#466edb32bada8d9b35f779c3ee8c514ac2df8dc0"
+  integrity sha512-KxdRyyFcS85pH3dnU8Y5yFUm2YJdaHwcBZWrfG8o89ZY9a13/f9itbN+YG3ELbBo9Pg5zvIozstmuV8bX13q6g==
 
 emoji-regex@^10.3.0:
   version "10.3.0"
