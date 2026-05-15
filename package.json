@@ -46,7 +46,7 @@
     "debug": "~4.4.0",
     "eslint-ast-utils": "~1.1.0",
     "import-modules": "~3.2.0",
-    "lodash": "~4.17.21"
+    "lodash": "~4.18.1"
   },
   "devDependencies": {
     "@ava/babel": "^2.0.0",
