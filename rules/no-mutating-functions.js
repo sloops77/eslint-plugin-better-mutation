@@ -5,7 +5,8 @@ const {
   isObjectExpression,
   isFunctionExpression,
   isScopedVariable,
-  isExemptedReducer} = require('./utils/common');
+  isExemptedReducer,
+} = require('./utils/common');
 
 const mutatingFunctions = [
   'Object.assign',
@@ -43,20 +44,22 @@ function buildIsMutatingFunction(ignoredMethods, useLodashFunctionImports) {
     _.reject(fn => _.includes(fn, ignoredMethods)),
     _.map(fn => {
       const [objectName, propertyName] = _.split('.', fn);
-      return propertyName ? ({
-        type: 'MemberExpression',
-        object: {
+      return propertyName
+        ? ({
+          type: 'MemberExpression',
+          object: {
+            type: 'Identifier',
+            name: objectName,
+          },
+          property: {
+            type: 'Identifier',
+            name: propertyName,
+          },
+        })
+        : ({
           type: 'Identifier',
           name: objectName,
-        },
-        property: {
-          type: 'Identifier',
-          name: propertyName,
-        },
-      }) : ({
-        type: 'Identifier',
-        name: objectName,
-      });
+        });
     }),
   )(mutatingFunctions);
 
