@@ -1,5 +1,5 @@
 # eslint-plugin-better-mutation 
-[![CircleCI](https://circleci.com/gh/sloops77/eslint-plugin-better-mutation.svg?style=svg)](https://circleci.com/gh/sloops77/eslint-plugin-better-mutation)
+[![CI](https://github.com/sloops77/eslint-plugin-better-mutation/actions/workflows/ci.yml/badge.svg)](https://github.com/sloops77/eslint-plugin-better-mutation/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/gh/sloops77/eslint-plugin-better-mutation/branch/master/graph/badge.svg)](https://codecov.io/gh/sloops77/eslint-plugin-better-mutation)
 [![XO code style](https://img.shields.io/badge/code_style-XO-5ed9c7.svg)](https://github.com/xojs/xo)
 
