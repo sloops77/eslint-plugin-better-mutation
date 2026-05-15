@@ -234,9 +234,7 @@ function isScopedFunctionIdentifier(identifier, node) {
     return false;
   }
 
-  return _.some(
-    n => isFunctionDeclaration(identifier)(n) || isExportedFunctionDeclaration(identifier)(n),
-  )(node.body)
+  return _.some(n => isFunctionDeclaration(identifier)(n) || isExportedFunctionDeclaration(identifier)(n))(node.body)
     || (!isEndOfBlock(node) && isScopedFunctionIdentifier(identifier, node.parent));
 }
 
