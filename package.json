@@ -10,7 +10,7 @@
     "url": "https://github.com/sloops77"
   },
   "engines": {
-    "node": ">=20.19.0"
+    "node": ">=20.19.6"
   },
   "scripts": {
     "init:ci": "rimraf reports && mkdir -p reports",
