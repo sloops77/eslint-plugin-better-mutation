@@ -2,13 +2,95 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
     "config:best-practices",
-    ":automergeMinor",
-    ":automergePr",
+    "security:minimumReleaseAgeNpm",
+    ":automergePatch",
     ":automergeRequireAllStatusChecks"
   ],
+  "dependencyDashboard": true,
+  "rangeStrategy": "bump",
   "packageRules": [
     {
-      "description": "Require manual review for major version upgrades.",
+      "description": "Review ESLint peer updates.",
+      "matchDepTypes": [
+        "peerDependencies"
+      ],
+      "matchPackageNames": [
+        "eslint"
+      ],
+      "automerge": false,
+      "labels": [
+        "compatibility",
+        "peer-dependency",
+        "eslint"
+      ]
+    },
+    {
+      "description": "Review major ESLint test updates.",
+      "matchDepTypes": [
+        "devDependencies"
+      ],
+      "matchPackageNames": [
+        "eslint",
+        "eslint-plugin-eslint-plugin",
+        "eslint-plugin-n"
+      ],
+      "matchUpdateTypes": [
+        "major"
+      ],
+      "automerge": false,
+      "labels": [
+        "test-dependency",
+        "eslint"
+      ]
+    },
+    {
+      "description": "Automerge non-major ESLint test updates.",
+      "matchDepTypes": [
+        "devDependencies"
+      ],
+      "matchPackageNames": [
+        "eslint",
+        "eslint-plugin-eslint-plugin",
+        "eslint-plugin-n"
+      ],
+      "matchUpdateTypes": [
+        "minor",
+        "patch"
+      ],
+      "automerge": true,
+      "labels": [
+        "test-dependency",
+        "eslint"
+      ]
+    },
+    {
+      "description": "Group test harness updates.",
+      "groupName": "test harness",
+      "matchPackageNames": [
+        "@ava/babel",
+        "ava",
+        "eslint-ava-rule-tester",
+        "nyc",
+        "tap-xunit"
+      ],
+      "labels": [
+        "test-harness"
+      ]
+    },
+    {
+      "description": "Group XO linting updates.",
+      "groupName": "xo linting",
+      "matchPackageNames": [
+        "eslint-formatter-junit",
+        "xo"
+      ],
+      "labels": [
+        "linting",
+        "xo"
+      ]
+    },
+    {
+      "description": "Review major updates.",
       "matchUpdateTypes": [
         "major"
       ],

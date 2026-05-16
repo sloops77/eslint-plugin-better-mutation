@@ -58,3 +58,52 @@ jobs:
         with:
           files: coverage/lcov.info
           use_oidc: true
+
+  compatibility:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node:
+          - 20.19.0
+          - 22
+          - 24
+        eslint_profile:
+          - name: eslint-9
+            eslint: "^9"
+            eslint_ava_rule_tester: "^5.0.1"
+            eslint_plugin_eslint_plugin: "^7.0.0"
+            eslint_plugin_n: "^18.0.0"
+          - name: eslint-10
+            eslint: "^10"
+            eslint_ava_rule_tester: "^5.0.1"
+            eslint_plugin_eslint_plugin: "^7.0.0"
+            eslint_plugin_n: "^18.0.0"
+    name: compatibility (${{ matrix.eslint_profile.name }}, node ${{ matrix.node }})
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: yarn
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Install ESLint compatibility profile
+        run: >
+          yarn add --dev --no-lockfile
+          "eslint@${{ matrix.eslint_profile.eslint }}"
+          "eslint-ava-rule-tester@${{ matrix.eslint_profile.eslint_ava_rule_tester }}"
+          "eslint-plugin-eslint-plugin@${{ matrix.eslint_profile.eslint_plugin_eslint_plugin }}"
+          "eslint-plugin-n@${{ matrix.eslint_profile.eslint_plugin_n }}"
+
+      - name: Run lint
+        run: yarn lint
+
+      - name: Run tests
+        run: yarn test
