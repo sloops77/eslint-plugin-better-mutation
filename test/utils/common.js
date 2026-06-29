@@ -1,5 +1,7 @@
-const test = require('ava');
+const ava = require('ava');
 const {isExemptedInitializer} = require('../../rules/utils/common');
+
+const test = ava.default ?? ava;
 
 test('should return false if rhsExpression is not a CallExpression', t => {
   const rhsExpression = {type: 'Literal'};

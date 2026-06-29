@@ -1,6 +1,8 @@
-const test = require('ava');
+const ava = require('ava');
 const AvaRuleTester = require('eslint-ava-rule-tester').default;
 const rule = require('../rules/no-mutating-functions');
+
+const test = ava.default ?? ava;
 
 const ruleTester = new AvaRuleTester(test, {
   languageOptions: {
