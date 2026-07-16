@@ -61,7 +61,7 @@
     "pify": "6.1.0",
     "rimraf": "6.1.3",
     "tap-xunit": "2.4.1",
-    "typescript": "6.0.3",
+    "typescript": "7.0.2",
     "xo": "2.0.2"
   },
   "peerDependencies": {
