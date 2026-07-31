@@ -31,23 +31,12 @@ jobs:
           registry-url: https://registry.npmjs.org/
           package-manager-cache: false
 
-      - name: Validate publish ref and tooling
+      - name: Validate publish ref
         env:
           PUBLISH_REF: ${{ github.event_name == 'workflow_dispatch' && inputs.ref || github.event.release.tag_name }}
         run: |
           package_version="$(node --print "require('./package.json').version")"
           expected_tag="v${package_version}"
-          npm_version="$(npm --version)"
-
-          node -e '
-            const [major = 0, minor = 0, patch = 0] = process.argv[1].split(".").map(Number);
-            const supported = major > 11
-              || (major === 11 && minor > 5)
-              || (major === 11 && minor === 5 && patch >= 1);
-            if (!supported) {
-              throw new Error("npm 11.5.1 or newer is required; found " + process.argv[1]);
-            }
-          ' "$npm_version"
 
           if [[ "$PUBLISH_REF" != "$expected_tag" ]]; then
             echo "Publish ref $PUBLISH_REF does not match package version $package_version" >&2
