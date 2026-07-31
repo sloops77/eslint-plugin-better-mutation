@@ -1,21 +1,56 @@
-# This workflow will run tests using node and then publish a package to GitHub Packages when a release is created
-# For more information see: https://docs.github.com/en/actions/publishing-packages/publishing-nodejs-packages
+# Publish releases to npm with GitHub Actions OIDC trusted publishing.
 
 name: Node.js Package
 
 on:
   release:
     types: [created]
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: Git ref containing the package version to publish
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  id-token: write
 
 jobs:
   publish-npm:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.ref || github.event.release.tag_name }}
+
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
         with:
-          node-version: lts/*
+          node-version: 24.12.0
           registry-url: https://registry.npmjs.org/
-      - run: yarn publish
+          package-manager-cache: false
+
+      - name: Validate publish ref and tooling
         env:
-          NODE_AUTH_TOKEN: ${{secrets.npm_token}}
+          PUBLISH_REF: ${{ github.event_name == 'workflow_dispatch' && inputs.ref || github.event.release.tag_name }}
+        run: |
+          package_version="$(node --print "require('./package.json').version")"
+          expected_tag="v${package_version}"
+          npm_version="$(npm --version)"
+
+          node -e '
+            const [major = 0, minor = 0, patch = 0] = process.argv[1].split(".").map(Number);
+            const supported = major > 11
+              || (major === 11 && minor > 5)
+              || (major === 11 && minor === 5 && patch >= 1);
+            if (!supported) {
+              throw new Error("npm 11.5.1 or newer is required; found " + process.argv[1]);
+            }
+          ' "$npm_version"
+
+          if [[ "$PUBLISH_REF" == v* && "$PUBLISH_REF" != "$expected_tag" ]]; then
+            echo "Publish ref $PUBLISH_REF does not match package version $package_version" >&2
+            exit 1
+          fi
+
+      - run: npm publish
