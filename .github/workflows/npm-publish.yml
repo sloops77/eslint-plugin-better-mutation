@@ -18,11 +18,12 @@ permissions:
 
 jobs:
   publish-npm:
+    if: github.event_name != 'workflow_dispatch' || github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
-          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.ref || github.event.release.tag_name }}
+          ref: refs/tags/${{ github.event_name == 'workflow_dispatch' && inputs.ref || github.event.release.tag_name }}
 
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
         with:
@@ -48,7 +49,7 @@ jobs:
             }
           ' "$npm_version"
 
-          if [[ "$PUBLISH_REF" == v* && "$PUBLISH_REF" != "$expected_tag" ]]; then
+          if [[ "$PUBLISH_REF" != "$expected_tag" ]]; then
             echo "Publish ref $PUBLISH_REF does not match package version $package_version" >&2
             exit 1
           fi
