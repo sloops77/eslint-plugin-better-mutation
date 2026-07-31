@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
     inputs:
       ref:
-        description: Git ref containing the package version to publish
+        description: Release tag to publish (for example, v3.0.0)
         required: true
         type: string
 
