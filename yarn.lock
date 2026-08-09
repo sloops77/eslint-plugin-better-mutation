@@ -2010,10 +2010,10 @@ eslint-plugin-es-x@^7.8.0:
     "@eslint-community/regexpp" "^4.11.0"
     eslint-compat-utils "^0.5.1"
 
-eslint-plugin-eslint-plugin@7.6.0:
-  version "7.6.0"
-  resolved "https://registry.yarnpkg.com/eslint-plugin-eslint-plugin/-/eslint-plugin-eslint-plugin-7.6.0.tgz#e0e15d7cf21fdefe3996f2e59c0e3deec62a9a15"
-  integrity sha512-eFYVIjNlAoF/PTvFqjcgS2gDcddsWay0qMb+AAWNqqxxtJ3535nUfUVpPMQkfSiksFjJmDVJo+wbpetwPK/T5g==
+eslint-plugin-eslint-plugin@7.6.1:
+  version "7.6.1"
+  resolved "https://registry.yarnpkg.com/eslint-plugin-eslint-plugin/-/eslint-plugin-eslint-plugin-7.6.1.tgz#769bf1ce361d93766bf17da09febdbf8e88a2c58"
+  integrity sha512-Knh3EFP4T9K/hIu/V7LE29P/wkwfodITf8b5Zcv+YVTvpb1LIlO44NZzZ7MHMEkD9alxeDmXiR462mgMYL2Odg==
   dependencies:
     "@eslint-community/eslint-utils" "^4.4.0"
     estraverse "^5.3.0"
