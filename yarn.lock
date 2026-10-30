@@ -1165,10 +1165,10 @@ async-sema@^3.1.1:
   resolved "https://registry.yarnpkg.com/async-sema/-/async-sema-3.1.1.tgz#e527c08758a0f8f6f9f15f799a173ff3c40ea808"
   integrity sha512-tLRNUXati5MFePdAk8dw7Qt7DpxPB60ofAgn8WRhW6a2rcimZnYBP9oxHiv0OHy+Wz7kPMG+t4LGdt31+4EmGg==
 
-ava@8.0.2:
-  version "8.0.2"
-  resolved "https://registry.yarnpkg.com/ava/-/ava-8.0.2.tgz#9519e028b9ca2ed2f540e9614f0c850c706a81b1"
-  integrity sha512-mTqZqikubkGBorVk2HKiw63ruEhpgYLnj/OcTlopFinYRPKlBQc1rBnOGSOZtBzgCuHpF2zqiKw2MGI0/klW9Q==
+ava@8.2.0:
+  version "8.2.0"
+  resolved "https://registry.yarnpkg.com/ava/-/ava-8.2.0.tgz#3f34984d83cbca1056ce258c9933f866c7a37c9a"
+  integrity sha512-9THsZEBUhwvA3e1oVqyJx9o4cBaLSkxScfP0oPlA9I7TDga51UDLMQJRy6bMDqMl3eubFCqxlj12h5IHEsLO7g==
   dependencies:
     "@vercel/nft" "^1.11.0"
     acorn "^8.19.0"
@@ -1188,7 +1188,7 @@ ava@8.0.2:
     concordance "^5.0.4"
     currently-unhandled "^0.4.1"
     debug "^4.4.3"
-    emittery "^2.1.0"
+    emittery "^2.2.0"
     figures "^6.1.0"
     globby "^16.2.4"
     ignore-by-default "^2.1.0"
@@ -1202,7 +1202,7 @@ ava@8.0.2:
     package-config "^5.0.0"
     picomatch "^4.0.7"
     plur "^6.0.0"
-    pretty-ms "^9.3.1"
+    pretty-ms "^10.0.0"
     resolve-cwd "^3.0.0"
     slash "^5.1.0"
     stack-utils "^2.0.6"
@@ -1742,7 +1742,7 @@ electron-to-chromium@^1.5.459:
   resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.5.464.tgz#dd0d56e63f35f2c2a1c36c06efd79fa017587a46"
   integrity sha512-nRa65aFge40viPAKxMKULIY8tcXKwKboJWNn4RoKwyWXJ6SP7BnrDGKUTzc64818jIciH0PK7LSF8QzZes19GA==
 
-emittery@^2.1.0:
+emittery@^2.2.0:
   version "2.2.0"
   resolved "https://registry.yarnpkg.com/emittery/-/emittery-2.2.0.tgz#d7d4133ca100f5d6927a9787bcb9456448048e06"
   integrity sha512-zpmLSuVIqrtTPDR2IYiTbxXB6XgrS7+rRk5uT4w6qgmxeNvtdnSaAOGNNbVokgm+0F6zrRufshUfSlnsPc7d8g==
@@ -4052,7 +4052,12 @@ prettier@^3.8.1:
   resolved "https://registry.yarnpkg.com/prettier/-/prettier-3.9.10.tgz#ac378e432f1a7381518f2e080816bbaefa38d585"
   integrity sha512-skGHTH1Yb9QvaTC4hWnRTzEYtCpApF0UMBPz+t/0ZPzP8ihefo/btKd+QA7pUE0fEwA1SbS/NmhyEcstdXOIdA==
 
-pretty-ms@^9.2.0, pretty-ms@^9.3.1:
+pretty-ms@^10.0.0:
+  version "10.0.0"
+  resolved "https://registry.yarnpkg.com/pretty-ms/-/pretty-ms-10.0.0.tgz#3a223bfea7625711955557f1a58389b80d9ed00c"
+  integrity sha512-6BWuxY2dCNgT45VnGzZcfNy7WeLqXiZqhhy4aHThTE6KI56R2ZBw9HQ7spPFKYchDizvJbPxTEknIpmW4FSmQA==
+
+pretty-ms@^9.2.0:
   version "9.3.1"
   resolved "https://registry.yarnpkg.com/pretty-ms/-/pretty-ms-9.3.1.tgz#7b58d8fbf376f01602ff05230358e8fa5e0f072b"
   integrity sha512-HzMy3Geq23nVALD/M2LliU+F+M+gVNsvkQWWqeBZ8HDiCgzo6YPJ/Omrmtq24EFrIsk0a3EkQGEd7bDOo+IhGA==
