@@ -26,5 +26,3 @@ dump/
 
 .DS_Store
 *.swp
-
-.yarnclean
