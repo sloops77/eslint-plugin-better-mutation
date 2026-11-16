@@ -1,10 +1,12 @@
-const ava = require('ava');
-const AvaRuleTester = require('eslint-ava-rule-tester').default;
+const {describe, it} = require('node:test');
+const {RuleTester} = require('eslint');
 const rule = require('../rules/no-mutating-functions');
 
-const test = ava.default ?? ava;
+RuleTester.describe = describe;
+RuleTester.it = it;
+RuleTester.itOnly = it.only;
 
-const ruleTester = new AvaRuleTester(test, {
+const ruleTester = new RuleTester({
   languageOptions: {
     ecmaVersion: 2024,
     sourceType: 'module',

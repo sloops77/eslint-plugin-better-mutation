@@ -13,11 +13,11 @@
     "node": "^22.20.0 || ^24.12.0 || >=26.0.0"
   },
   "scripts": {
-    "init:ci": "rimraf reports && mkdir -p reports",
+    "init:ci": "rimraf reports coverage && mkdir -p reports coverage",
     "lint": "xo",
     "lint:ci": "xo --reporter junit > reports/lint-results.xml",
-    "test": "nyc ava",
-    "test:ci": "nyc --reporter=lcov ava --tap | tap-xunit > reports/test-results.xml"
+    "test": "node --test --experimental-test-coverage --test-coverage-include=index.js --test-coverage-include='rules/**' 'test/**/*.js'",
+    "test:ci": "node --test --experimental-test-coverage --test-coverage-include=index.js --test-coverage-include='rules/**' --test-reporter=spec --test-reporter-destination=stdout --test-reporter=junit --test-reporter-destination=reports/test-results.xml --test-reporter=lcov --test-reporter-destination=coverage/lcov.info 'test/**/*.js'"
   },
   "files": [
     "index.js",
@@ -42,33 +42,19 @@
     "methods"
   ],
   "dependencies": {
-    "create-eslint-index": "~1.0.0",
-    "debug": "~4.4.3",
-    "eslint-ast-utils": "~1.1.0",
-    "import-modules": "~3.2.0",
     "lodash": "~4.18.0"
   },
   "devDependencies": {
-    "@ava/babel": "2.0.0",
-    "ava": "8.4.0",
     "eslint": "10.15.0",
-    "eslint-ava-rule-tester": "5.0.1",
     "eslint-formatter-junit": "9.0.1",
     "eslint-plugin-eslint-plugin": "7.6.2",
     "eslint-plugin-n": "18.5.0",
-    "inject-in-tag": "1.1.1",
-    "nyc": "18.0.0",
-    "pify": "6.1.0",
     "rimraf": "6.1.4",
-    "tap-xunit": "2.4.1",
     "typescript": "7.0.2",
     "xo": "2.0.2"
   },
   "peerDependencies": {
     "eslint": "^9.0.0 || ^10.0.0"
-  },
-  "ava": {
-    "babel": true
   },
   "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
 }

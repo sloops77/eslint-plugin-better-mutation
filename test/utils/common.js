@@ -1,42 +1,41 @@
-const ava = require('ava');
+const test = require('node:test');
+const assert = require('node:assert/strict');
 const {isExemptedInitializer} = require('../../rules/utils/common');
 
-const test = ava.default ?? ava;
-
-test('should return false if rhsExpression is not a CallExpression', t => {
+test('should return false if rhsExpression is not a CallExpression', () => {
   const rhsExpression = {type: 'Literal'};
   const exemptedInitializers = ['someFunction'];
-  t.false(isExemptedInitializer(rhsExpression, exemptedInitializers));
+  assert.equal(isExemptedInitializer(rhsExpression, exemptedInitializers), false);
 });
 
-test('should return false if exemptedInitializers is null or undefined', t => {
+test('should return false if exemptedInitializers is null or undefined', () => {
   const rhsExpression = {
     type: 'CallExpression',
     callee: {name: 'someFunction'},
   };
-  t.false(isExemptedInitializer(rhsExpression, null));
-  t.false(isExemptedInitializer(rhsExpression, undefined));
+  assert.equal(isExemptedInitializer(rhsExpression, null), false);
+  assert.equal(isExemptedInitializer(rhsExpression, undefined), false);
 });
 
-test('should return true if exemptedInitializers contains the initializer', t => {
+test('should return true if exemptedInitializers contains the initializer', () => {
   const rhsExpression = {
     type: 'CallExpression',
     callee: {name: 'someFunction'},
   };
   const exemptedInitializers = ['someFunction'];
-  t.true(isExemptedInitializer(rhsExpression, exemptedInitializers));
+  assert.equal(isExemptedInitializer(rhsExpression, exemptedInitializers), true);
 });
 
-test('should return false if exemptedInitializers does not contain the initializer', t => {
+test('should return false if exemptedInitializers does not contain the initializer', () => {
   const rhsExpression = {
     type: 'CallExpression',
     callee: {name: 'anotherFunction'},
   };
   const exemptedInitializers = ['someFunction'];
-  t.false(isExemptedInitializer(rhsExpression, exemptedInitializers));
+  assert.equal(isExemptedInitializer(rhsExpression, exemptedInitializers), false);
 });
 
-test('should handle recursive cases with callee.object', t => {
+test('should handle recursive cases with callee.object', () => {
   const rhsExpression = {
     type: 'CallExpression',
     callee: {
@@ -47,5 +46,5 @@ test('should handle recursive cases with callee.object', t => {
     },
   };
   const exemptedInitializers = ['nestedFunction'];
-  t.true(isExemptedInitializer(rhsExpression, exemptedInitializers));
+  assert.equal(isExemptedInitializer(rhsExpression, exemptedInitializers), true);
 });

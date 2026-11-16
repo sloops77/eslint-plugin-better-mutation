@@ -66,20 +66,6 @@
       ]
     },
     {
-      "description": "Group test harness updates.",
-      "groupName": "test harness",
-      "matchPackageNames": [
-        "@ava/babel",
-        "ava",
-        "eslint-ava-rule-tester",
-        "nyc",
-        "tap-xunit"
-      ],
-      "labels": [
-        "test-harness"
-      ]
-    },
-    {
       "description": "Group XO linting updates.",
       "groupName": "xo linting",
       "matchPackageNames": [
@@ -90,6 +76,16 @@
         "linting",
         "xo"
       ]
+    },
+    {
+      "description": "eslint-formatter-junit is ESLint's JUnit formatter moved out of core; it is stable rather than abandoned.",
+      "matchDatasources": [
+        "npm"
+      ],
+      "matchPackageNames": [
+        "eslint-formatter-junit"
+      ],
+      "abandonmentThreshold": null
     },
     {
       "description": "Review major updates.",
