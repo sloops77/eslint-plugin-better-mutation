@@ -1,16 +1,15 @@
-const ava = require('ava');
+const test = require('node:test');
+const assert = require('node:assert/strict');
 const {rules, defaults} = require('../index');
 
-const test = ava.default ?? ava;
-
-test('import rules', t => {
-  t.deepEqual(Object.keys(rules).toSorted(), [
+test('import rules', () => {
+  assert.deepEqual(Object.keys(rules).toSorted(), [
     'no-mutating-functions',
     'no-mutating-methods',
     'no-mutation',
   ].toSorted());
 });
 
-test('default values exported', t => {
-  t.deepEqual(Object.keys(defaults).toSorted(), ['defaultInitializers', 'defaultReducers'].toSorted());
+test('default values exported', () => {
+  assert.deepEqual(Object.keys(defaults).toSorted(), ['defaultInitializers', 'defaultReducers'].toSorted());
 });

@@ -1,20 +1,23 @@
 'use strict';
 
-const importModules = require('import-modules');
-const createIndex = require('create-eslint-index');
 const packageJson = require('./package.json');
+const noMutatingFunctions = require('./rules/no-mutating-functions');
+const noMutatingMethods = require('./rules/no-mutating-methods');
+const noMutation = require('./rules/no-mutation');
 const defaults = require('./rules/utils/defaults');
 
-const rules = importModules('rules', {camelize: false});
+const rules = {
+  'no-mutating-functions': noMutatingFunctions,
+  'no-mutating-methods': noMutatingMethods,
+  'no-mutation': noMutation,
+};
 
 const externalRecommendedRules = {
   'no-var': 'error',
 };
 
-const internalRecommendedRules = createIndex.createConfig({
-  plugin: 'better-mutation',
-  field: 'meta.docs.recommended',
-}, rules);
+const internalRecommendedRules = Object.fromEntries(Object.entries(rules)
+  .map(([name, rule]) => [`better-mutation/${name}`, rule.meta.docs.recommended]));
 
 const plugin = {
   meta: {
