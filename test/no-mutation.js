@@ -197,6 +197,14 @@ ruleTester.run('no-mutation', rule, {
       code: 'for(let i = 3; i > 0; --i){}',
       options: [{allowUnaryOperatorInForLoops: true}],
     },
+    {
+      code: 'for(let i = 0, j = 0; i < 3; i++, j--){}',
+      options: [{allowUnaryOperatorInForLoops: true}],
+    },
+    {
+      code: 'for(let i = 0; i < 3; foo(), (bar(), i++)){}',
+      options: [{allowUnaryOperatorInForLoops: true}],
+    },
   ],
   invalid: [
     {
@@ -270,6 +278,15 @@ ruleTester.run('no-mutation', rule, {
       code: 'for(let i = 3; i-- > 0; ){}',
       options: [{allowUnaryOperatorInForLoops: true}],
       errors: [decrementError],
+    },
+    {
+      code: 'for(let i = 0, j = 0; i < 3; i++, j--){}',
+      errors: [incrementError, decrementError],
+    },
+    {
+      code: 'let i = 0; foo(), i++;',
+      options: [{allowUnaryOperatorInForLoops: true}],
+      errors: [incrementError],
     },
     {
       code: 'function foo(a) { a = a || {}; }',
