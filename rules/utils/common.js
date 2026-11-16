@@ -1,51 +1,27 @@
-const _ = require('lodash/fp');
+// Partial deep match of an AST node against a spec of nested objects and primitive values.
+function isMatch(value, spec) {
+  return Object.entries(spec).every(([key, expected]) => typeof expected === 'object'
+    ? isMatch(value?.[key], expected)
+    : value?.[key] === expected);
+}
 
-const isReference = _.flow(
-  _.property('type'),
-  _.includes(_, ['MemberExpression', 'Identifier']),
-);
+const matches = spec => value => isMatch(value, spec);
 
-const isExportDeclaration = _.flow(
-  _.property('type'),
-  _.includes(_, ['ExportDefaultDeclaration', 'ExportNamedDeclaration']),
-);
+const ofType = (...types) => node => types.includes(node?.type);
 
-const isLiteral = _.flow(_.property('type'), _.includes(_, ['ObjectExpression', 'ArrayExpression', 'Literal']));
+const isReference = ofType('MemberExpression', 'Identifier');
+const isExportDeclaration = ofType('ExportDefaultDeclaration', 'ExportNamedDeclaration');
+const isLiteral = ofType('ObjectExpression', 'ArrayExpression', 'Literal');
+const isObjectExpression = ofType('ObjectExpression', 'ArrayExpression');
+const isNewExpression = ofType('NewExpression');
+const isCallExpression = ofType('CallExpression');
+const isFunctionExpression = ofType('FunctionExpression', 'ArrowFunctionExpression');
+const isConditionalExpression = ofType('ConditionalExpression');
+const isClassOrFunctionDeclaration = ofType('ClassDeclaration', 'FunctionDeclaration');
+const isEndOfBlock = ofType('Program', 'FunctionDeclaration', 'ClassDeclaration', 'FunctionExpression', 'ArrowFunctionExpression');
 
-const isObjectExpression = _.flow(
-  _.property('type'),
-  _.includes(_, ['ObjectExpression', 'ArrayExpression']),
-);
-
-const isNewExpression = _.flow(
-  _.property('type'),
-  _.includes(_, ['NewExpression']),
-);
-
-const isCallExpression = _.flow(
-  _.property('type'),
-  _.includes(_, ['CallExpression']),
-);
-
-const isFunctionExpression = _.flow(
-  _.property('type'),
-  _.includes(_, ['FunctionExpression', 'ArrowFunctionExpression']),
-);
-
-const isConditionalExpression = _.flow(
-  _.property('type'),
-  _.includes(_, ['ConditionalExpression']),
-);
-
-const isClassOrFunctionDeclaration = _.flow(
-  _.property('type'),
-  _.includes(_, ['ClassDeclaration', 'FunctionDeclaration']),
-);
-
-const isEndOfBlock = _.flow(
-  _.property('type'),
-  _.includes(_, ['Program', 'FunctionDeclaration', 'ClassDeclaration', 'FunctionExpression', 'ArrowFunctionExpression']),
-);
+// Statement lists (Program, blocks, class bodies) are arrays; other nodes have no statements to search.
+const someInBody = (node, predicate) => Array.isArray(node.body) && node.body.some(statement => predicate(statement));
 
 const buildInitializer = callee => {
   if (callee.name) {
@@ -77,12 +53,12 @@ function getBlockAncestor(node) {
   return current;
 }
 
-function isFunctionDeclaration(identifier) {
-  return _.overEvery([isClassOrFunctionDeclaration, _.matches({id: {name: identifier}})]);
+function isFunctionDeclaration(node, identifier) {
+  return isClassOrFunctionDeclaration(node) && identifier !== undefined && node.id?.name === identifier;
 }
 
 function isExportedFunctionDeclaration(node, identifier) {
-  return isExportDeclaration(node) && isFunctionDeclaration(identifier)(_.get('declaration')(node));
+  return isExportDeclaration(node) && isFunctionDeclaration(node?.declaration, identifier);
 }
 
 function isForStatementVariable(identifier, node, exemptedInitializers) {
@@ -106,7 +82,7 @@ function getReference(node) {
 }
 
 function isValidInit(rhsExpression, node, allowFunctionProps, exemptedInitializers) {
-  return !_.isNil(rhsExpression) && (
+  return rhsExpression !== null && rhsExpression !== undefined && (
     isLiteral(rhsExpression)
     || (isNewExpression(rhsExpression) && rhsExpression.callee.name !== 'Object') // In JS, the Object constructor doesnt allocate memory so it is buggy and should be avoided
     || isExemptedInitializer(rhsExpression, exemptedInitializers)
@@ -118,29 +94,29 @@ function isValidInit(rhsExpression, node, allowFunctionProps, exemptedInitialize
 }
 
 function getLeftMostObject(arg) {
-  const object = _.get('object')(arg);
+  const object = arg?.object;
   return object ? getLeftMostObject(object) : arg;
 }
 
 function getIdentifierDeclaration(identifier, node) {
-  const declarations = _.get('declarations', node) || [];
+  const declarations = node?.declarations || [];
   return declarations.find(n => {
     if (n.type !== 'VariableDeclarator') {
       return false;
     }
 
-    const id = _.get('id', n);
-    if (_.get('type', id) === 'ObjectPattern') {
-      const destructuredProperties = _.get('properties', id) || [];
-      return _.find(prop => prop.value?.name === identifier || (prop.type === 'RestElement' && prop.argument?.name === identifier), destructuredProperties);
+    const {id} = n;
+    if (id?.type === 'ObjectPattern') {
+      const destructuredProperties = id.properties || [];
+      return destructuredProperties.find(prop => prop.value?.name === identifier || (prop.type === 'RestElement' && prop.argument?.name === identifier));
     }
 
-    if (_.get('type', id) === 'ArrayPattern') {
-      const destructuredElements = _.get('elements', id) || [];
-      return _.find(element => element?.name === identifier || (element?.type === 'RestElement' && element.argument?.name === identifier), destructuredElements);
+    if (id?.type === 'ArrayPattern') {
+      const destructuredElements = id.elements || [];
+      return destructuredElements.find(element => element?.name === identifier || (element?.type === 'RestElement' && element.argument?.name === identifier));
     }
 
-    return _.get('name', id) === identifier;
+    return id?.name === identifier;
   });
 }
 
@@ -159,8 +135,8 @@ function isVariableDeclaration(node, identifier, allowFunctionProps, exemptedIni
   //   isValidInit: isValidInit(_.get('init', declaration), finalNode, exemptedInitializers),
   // });
   return (
-    !_.isNil(declaration)
-    && isValidInit(_.get('init', declaration), finalNode, allowFunctionProps, exemptedInitializers)
+    declaration !== null && declaration !== undefined
+    && isValidInit(declaration.init, finalNode, allowFunctionProps, exemptedInitializers)
   );
 }
 
@@ -172,60 +148,66 @@ function isLetDeclaration(node, identifier) {
   }
 
   const declaration = getIdentifierDeclaration(identifier, finalNode);
-  return !_.isNil(declaration);
+  return declaration !== null && declaration !== undefined;
 }
 
 function isScopedVariableIdentifier(identifier, node, allowFunctionProps, exemptedInitializers) {
-  if (_.isNil(node)) {
+  if (node === null || node === undefined) {
     return false;
   }
 
-  return _.some(n => isVariableDeclaration(n, identifier, allowFunctionProps, exemptedInitializers), node.body)
+  return someInBody(node, n => isVariableDeclaration(n, identifier, allowFunctionProps, exemptedInitializers))
     || isForStatementVariable(identifier, node)
     || (!isEndOfBlock(node) && isScopedVariableIdentifier(identifier, node.parent, allowFunctionProps, exemptedInitializers));
 }
 
 function isScopedLetIdentifier(identifier, node) {
-  if (_.isNil(node)) {
+  if (node === null || node === undefined) {
     return false;
   }
 
-  return _.some(n => isLetDeclaration(n, identifier), node.body)
+  return someInBody(node, n => isLetDeclaration(n, identifier))
     || (!isEndOfBlock(node) && isScopedLetIdentifier(identifier, node.parent));
 }
 
 function isScopedLetVariableAssignment(node) {
-  if (_.get('operator', node) !== '=') {
+  if (node?.operator !== '=') {
     return false;
   }
 
-  const identifier = _.get('name')(getLeftMostObject(node.left));
+  const identifier = getLeftMostObject(node.left)?.name;
   return isScopedLetIdentifier(identifier, node.parent);
 }
 
 function isScopedVariable(arg, node, allowFunctionProps, exemptedInitializers) {
-  const identifier = _.get('name')(getLeftMostObject(arg));
+  const identifier = getLeftMostObject(arg)?.name;
   return identifier ? (allowFunctionProps && isScopedFunctionIdentifier(identifier, node)) || isScopedVariableIdentifier(identifier, node, allowFunctionProps, exemptedInitializers) : false;
 }
 
 function isScopedFunctionIdentifier(identifier, node) {
-  if (_.isNil(node)) {
+  if (node === null || node === undefined) {
     return false;
   }
 
-  return _.some(n => isFunctionDeclaration(identifier)(n) || isExportedFunctionDeclaration(n, identifier), node.body)
-    || (!isEndOfBlock(node) && isScopedFunctionIdentifier(identifier, node.parent));
+  if (someInBody(node, n => isFunctionDeclaration(n, identifier) || isExportedFunctionDeclaration(n, identifier))) {
+    return true;
+  }
+
+  // A function or class declaration's own name is in scope inside its body.
+  return isEndOfBlock(node)
+    ? isFunctionDeclaration(node, identifier)
+    : isScopedFunctionIdentifier(identifier, node.parent);
 }
 
 function isScopedFunction(arg, node) {
-  const identifier = _.get('name')(getLeftMostObject(arg));
+  const identifier = getLeftMostObject(arg)?.name;
   return isScopedFunctionIdentifier(identifier, node);
 }
 
 function isExemptedReducer(exemptedReducerCallees, node) {
   const endOfBlockNode = getBlockAncestor(node);
-  const callee = _.get('parent.callee', endOfBlockNode);
-  return callee && _.includes(_.getOr(_.get('name', callee), 'property.name', callee), exemptedReducerCallees);
+  const callee = endOfBlockNode?.parent?.callee;
+  return callee && exemptedReducerCallees.includes(callee.property?.name ?? callee.name);
 }
 
 /**
@@ -263,6 +245,7 @@ function isForLoopAfterthought(node) {
 }
 
 module.exports = {
+  matches,
   isExemptedReducer,
   isExemptedInitializer,
   isFunctionExpression,
