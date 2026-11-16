@@ -18,7 +18,7 @@ See [WHY.](why.md)
 ## What's not safe?
 Mutating variables of **shared** variables is unsafe. This means reassignment outside of the scope they are declared within whether its because they are globals, function parameters, or closed over variables can lead to undefined behaviour that is hard to debug and can cause race conditions. Instead of mutating always return a new value.
 
-```
+```js
 g = 2 // global reassignment is unsafe
 
 function foo(i) {
@@ -34,7 +34,7 @@ function bar() {
 ## What's safe?
 Block scoped (`let`) or function scoped variables (`var`) can be reassigned safely. 
 
-```
+```js
 function foo() {
   let i = 1; 
   i = 2;
@@ -42,7 +42,7 @@ function foo() {
 ```
 
 Even objects or arrays marked with `const` can have nested properties changed within the block scope they belong to. The same rules apply for mutating functions (e.g. `Object.assign()` and mutating methods `[].push()`
-```
+```js
 function foo() {
   const o = { a: 0 };
   o.a += 1;
@@ -50,12 +50,12 @@ function foo() {
 ```
 
 Common js uses assignment and is supported via a special case
-```
+```js
 module.exports = { foo }; // by default commonjs exports are configured to be safe
 ```
 
 Variables created using constructors such as the Array constructor are safe to modify. However the Object constructor is not safe  because it returns the reference if its an object)
-```
+```js
 const myObject = new MyObject();
 myObject.foo = 'bar'
 
@@ -67,20 +67,20 @@ o.foo = 'bar' // error
 ```
 
 Variables created using static initializers such as the Array constructor, `Array.from` or `Array.of` are also safe to modify. 
-```
+```js
 const array = Array.of(1,2,3)
 array[2] += 1;
 ```
 
 Similarly for Objects there are a few static initializers that are safe.
-```
+```js
 const o = Object.create({1,2,3})
 o.foo = 'bar' // safe
 ```
 
 Changing an array created using an instance method such as map is not permitted. Most JS developers would never do this!
 If you would like it track the open issue at https://github.com/sloops77/eslint-plugin-better-mutation/issues
-```
+```js
 const x = array.map(i => i + 1);
 x[2] += 1;  // error
 ```
@@ -88,7 +88,7 @@ x[2] += 1;  // error
 Reducer functions/methods are a special case and may modify the `accumulator` parameter because 
 the loop that the reducer executes limits the scope of the accumulator to the reducer function. 
 
-``` 
+```js
 function sum(numbers) {
   return numbers.reduce((acc, val) => {
     acc += val;  // this is safe!
@@ -100,7 +100,7 @@ function sum(numbers) {
 
 ## Install
 
-```
+```sh
 $ npm install --save-dev eslint eslint-plugin-better-mutation
 ```
 

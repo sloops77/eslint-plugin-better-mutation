@@ -52,50 +52,41 @@ const buildInitializer = callee => {
     return callee.name;
   }
 
-  if (callee.object?.name) {
-    return `${callee.object.name}.${callee.property.name}`;
-  }
-
-  return null;
+  return callee.object?.name ? `${callee.object.name}.${callee.property.name}` : null;
 };
 
 const isExemptedInitializer = (rhsExpression, exemptedInitializers) => {
-  if (!isCallExpression(rhsExpression)) {
-    return false;
+  let expression = rhsExpression;
+  while (isCallExpression(expression)) {
+    if (exemptedInitializers?.includes(buildInitializer(expression.callee))) {
+      return true;
+    }
+
+    expression = expression.callee.object;
   }
 
-  const initializer = buildInitializer(rhsExpression.callee);
-  if (exemptedInitializers?.includes(initializer)) {
-    return true;
-  }
-
-  return isExemptedInitializer(rhsExpression.callee.object, exemptedInitializers);
+  return false;
 };
 
 function getBlockAncestor(node) {
-  if (isEndOfBlock(node)) {
-    return node;
+  let current = node;
+  while (!isEndOfBlock(current)) {
+    current = current.parent;
   }
 
-  return getBlockAncestor(node.parent);
+  return current;
 }
 
 function isFunctionDeclaration(identifier) {
   return _.overEvery([isClassOrFunctionDeclaration, _.matches({id: {name: identifier}})]);
 }
 
-function isExportedFunctionDeclaration(identifier) {
-  return function (node) {
-    return isExportDeclaration(node) && isFunctionDeclaration(identifier)(_.get('declaration')(node));
-  };
+function isExportedFunctionDeclaration(node, identifier) {
+  return isExportDeclaration(node) && isFunctionDeclaration(identifier)(_.get('declaration')(node));
 }
 
 function isForStatementVariable(identifier, node, exemptedInitializers) {
-  if (node.type === 'ForStatement') {
-    return isVariableDeclaration(identifier, false, exemptedInitializers)(node.init);
-  }
-
-  return false;
+  return node.type === 'ForStatement' && isVariableDeclaration(node.init, identifier, false, exemptedInitializers);
 }
 
 function getReference(node) {
@@ -128,11 +119,7 @@ function isValidInit(rhsExpression, node, allowFunctionProps, exemptedInitialize
 
 function getLeftMostObject(arg) {
   const object = _.get('object')(arg);
-  if (!object) {
-    return arg;
-  }
-
-  return getLeftMostObject(object);
+  return object ? getLeftMostObject(object) : arg;
 }
 
 function getIdentifierDeclaration(identifier, node) {
@@ -157,39 +144,35 @@ function getIdentifierDeclaration(identifier, node) {
   });
 }
 
-function isVariableDeclaration(identifier, allowFunctionProps, exemptedInitializers) {
-  return function (node) {
-    const finalNode = node || {}; // Todo not sure about this defaulting. seems to fix weird bug
+function isVariableDeclaration(node, identifier, allowFunctionProps, exemptedInitializers) {
+  const finalNode = node || {}; // Todo not sure about this defaulting. seems to fix weird bug
 
-    if (finalNode.type !== 'VariableDeclaration') {
-      return false;
-    }
+  if (finalNode.type !== 'VariableDeclaration') {
+    return false;
+  }
 
-    const declaration = getIdentifierDeclaration(identifier, finalNode);
-    // Debug('%j', {
-    //   f: 'isVariableDeclaration',
-    //   nodeType: finalNode.type,
-    //   declarationType: declaration?.type,
-    //   isValidInit: isValidInit(_.get('init', declaration), finalNode, exemptedInitializers),
-    // });
-    return (
-      !_.isNil(declaration)
-      && isValidInit(_.get('init', declaration), finalNode, allowFunctionProps, exemptedInitializers)
-    );
-  };
+  const declaration = getIdentifierDeclaration(identifier, finalNode);
+  // Debug('%j', {
+  //   f: 'isVariableDeclaration',
+  //   nodeType: finalNode.type,
+  //   declarationType: declaration?.type,
+  //   isValidInit: isValidInit(_.get('init', declaration), finalNode, exemptedInitializers),
+  // });
+  return (
+    !_.isNil(declaration)
+    && isValidInit(_.get('init', declaration), finalNode, allowFunctionProps, exemptedInitializers)
+  );
 }
 
-function isLetDeclaration(identifier) {
-  return function (node) { // Todo not sure about this defaulting. seems to fix weird bug
-    const finalNode = node || {};
+function isLetDeclaration(node, identifier) {
+  const finalNode = node || {}; // Todo not sure about this defaulting. seems to fix weird bug
 
-    if (finalNode.type !== 'VariableDeclaration' || finalNode.kind !== 'let') {
-      return false;
-    }
+  if (finalNode.type !== 'VariableDeclaration' || finalNode.kind !== 'let') {
+    return false;
+  }
 
-    const declaration = getIdentifierDeclaration(identifier, finalNode);
-    return !_.isNil(declaration);
-  };
+  const declaration = getIdentifierDeclaration(identifier, finalNode);
+  return !_.isNil(declaration);
 }
 
 function isScopedVariableIdentifier(identifier, node, allowFunctionProps, exemptedInitializers) {
@@ -197,7 +180,7 @@ function isScopedVariableIdentifier(identifier, node, allowFunctionProps, exempt
     return false;
   }
 
-  return _.some(isVariableDeclaration(identifier, allowFunctionProps, exemptedInitializers), node.body)
+  return _.some(n => isVariableDeclaration(n, identifier, allowFunctionProps, exemptedInitializers), node.body)
     || isForStatementVariable(identifier, node)
     || (!isEndOfBlock(node) && isScopedVariableIdentifier(identifier, node.parent, allowFunctionProps, exemptedInitializers));
 }
@@ -207,7 +190,7 @@ function isScopedLetIdentifier(identifier, node) {
     return false;
   }
 
-  return _.some(isLetDeclaration(identifier))(node.body)
+  return _.some(n => isLetDeclaration(n, identifier), node.body)
     || (!isEndOfBlock(node) && isScopedLetIdentifier(identifier, node.parent));
 }
 
@@ -222,11 +205,7 @@ function isScopedLetVariableAssignment(node) {
 
 function isScopedVariable(arg, node, allowFunctionProps, exemptedInitializers) {
   const identifier = _.get('name')(getLeftMostObject(arg));
-  if (!identifier) {
-    return false;
-  }
-
-  return (allowFunctionProps && isScopedFunctionIdentifier(identifier, node)) || isScopedVariableIdentifier(identifier, node, allowFunctionProps, exemptedInitializers);
+  return identifier ? (allowFunctionProps && isScopedFunctionIdentifier(identifier, node)) || isScopedVariableIdentifier(identifier, node, allowFunctionProps, exemptedInitializers) : false;
 }
 
 function isScopedFunctionIdentifier(identifier, node) {
@@ -234,7 +213,7 @@ function isScopedFunctionIdentifier(identifier, node) {
     return false;
   }
 
-  return _.some(n => isFunctionDeclaration(identifier)(n) || isExportedFunctionDeclaration(identifier)(n))(node.body)
+  return _.some(n => isFunctionDeclaration(identifier)(n) || isExportedFunctionDeclaration(n, identifier), node.body)
     || (!isEndOfBlock(node) && isScopedFunctionIdentifier(identifier, node.parent));
 }
 
@@ -250,11 +229,11 @@ function isExemptedReducer(exemptedReducerCallees, node) {
 }
 
 /**
- * Determines whether the given node is the update node of a `ForStatement`.
- * @param {ASTNode} node The node to check.
- * @returns {boolean} `true` if the node is `ForStatement` update.
- * @author Ian Christian Myers
- * @author Brody McKee (github.com/mrmckeb)
+ Determines whether the given node is the update node of a `ForStatement`.
+ @param {ASTNode} node The node to check.
+ @returns {boolean} `true` if the node is `ForStatement` update.
+ @author Ian Christian Myers
+ @author Brody McKee (github.com/mrmckeb)
  */
 function isForStatementUpdate(node) {
   const {parent} = node;
@@ -263,25 +242,24 @@ function isForStatementUpdate(node) {
 }
 
 /**
- * Determines whether the given node is considered to be a for loop "afterthought" by the logic of this rule.
- * In particular, it returns `true` if the given node is either:
- *   - The update node of a `ForStatement`: for (;; i++) {}
- *   - An operand of a sequence expression that is the update node: for (;; foo(), i++) {}
- *   - An operand of a sequence expression that is child of another sequence expression, etc.,
- *     up to the sequence expression that is the update node: for (;; foo(), (bar(), (baz(), i++))) {}
- * @param {ASTNode} node The node to check.
- * @returns {boolean} `true` if the node is a for loop afterthought.
- * @author Ian Christian Myers
- * @author Brody McKee (github.com/mrmckeb)
+ Determines whether the given node is considered to be a for loop "afterthought" by the logic of this rule.
+ In particular, it returns `true` if the given node is either:
+ - The update node of a `ForStatement`: for (;; i++) {}
+ - An operand of a sequence expression that is the update node: for (;; foo(), i++) {}
+ - An operand of a sequence expression that is child of another sequence expression, etc.,
+ up to the sequence expression that is the update node: for (;; foo(), (bar(), (baz(), i++))) {}
+ @param {ASTNode} node The node to check.
+ @returns {boolean} `true` if the node is a for loop afterthought.
+ @author Ian Christian Myers
+ @author Brody McKee (github.com/mrmckeb)
  */
 function isForLoopAfterthought(node) {
-  const {parent} = node;
-
-  if (parent.type === 'SequenceExpression') {
-    return isForLoopAfterthought(parent);
+  let current = node;
+  while (current.parent.type === 'SequenceExpression') {
+    current = current.parent;
   }
 
-  return isForStatementUpdate(node);
+  return isForStatementUpdate(current);
 }
 
 module.exports = {
