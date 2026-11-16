@@ -6,7 +6,9 @@
     ":automergePatch",
     ":automergeRequireAllStatusChecks"
   ],
-  "dependencyDashboard": true,
+  "dependencyDashboard": {
+    "enabled": true
+  },
   "rangeStrategy": "bump",
   "packageRules": [
     {
