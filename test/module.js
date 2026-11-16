@@ -3,13 +3,13 @@ const assert = require('node:assert/strict');
 const {rules, defaults} = require('../index');
 
 test('import rules', () => {
-  assert.deepEqual(Object.keys(rules).toSorted(), [
+  assert.deepEqual(new Set(Object.keys(rules)), new Set([
     'no-mutating-functions',
     'no-mutating-methods',
     'no-mutation',
-  ].toSorted());
+  ]));
 });
 
 test('default values exported', () => {
-  assert.deepEqual(Object.keys(defaults).toSorted(), ['defaultInitializers', 'defaultReducers'].toSorted());
+  assert.deepEqual(new Set(Object.keys(defaults)), new Set(['defaultInitializers', 'defaultReducers']));
 });

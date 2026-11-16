@@ -20,7 +20,7 @@ const isExports = _.matches({
   type: 'Identifier', name: 'exports',
 });
 
-const isPrototype = _.matches({
+const isPrototypeMemberExpression = _.matches({
   type: 'MemberExpression',
   object: {
     object: {
@@ -37,15 +37,13 @@ function isModuleExportsMemberExpression(node) {
   return _.overSome([
     isExports,
     isModuleExports,
-    function (node) {
-      return node.type === 'MemberExpression' && isModuleExportsMemberExpression(node.object);
-    },
+    candidate => candidate.type === 'MemberExpression' && isModuleExportsMemberExpression(candidate.object),
   ])(node);
 }
 
 const isPrototypeAssignment = node => _.flow(
   _.property('left'),
-  isPrototype,
+  isPrototypeMemberExpression,
 )(node) && isScopedFunction(node.left, node.parent);
 
 const isCommonJsExport = _.flow(

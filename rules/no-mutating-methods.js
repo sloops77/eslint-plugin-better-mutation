@@ -36,11 +36,8 @@ const create = function (context) {
 
   return {
     CallExpression(node) {
-      if (node.callee.type !== 'MemberExpression') {
-        return;
-      }
-
-      if (node.callee.object.type === 'Identifier' && allowedObjects.includes(node.callee.object.name)) {
+      if (node.callee.type !== 'MemberExpression'
+        || (node.callee.object.type === 'Identifier' && allowedObjects.includes(node.callee.object.name))) {
         return;
       }
 

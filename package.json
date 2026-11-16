@@ -4,14 +4,12 @@
   "description": "ESLint rules for controlling where and how mutation is used.",
   "license": "MIT",
   "repository": "sloops77/eslint-plugin-better-mutation",
-  "author": {
-    "name": "Andres Olave",
-    "email": "andres@thinkingbytes.net",
-    "url": "https://github.com/sloops77"
-  },
+  "author": "Andres Olave <andres@thinkingbytes.net> (https://github.com/sloops77)",
+  "main": "./index.js",
   "engines": {
     "node": "^22.20.0 || ^24.12.0 || >=26.0.0"
   },
+  "packageManager": "pnpm@12.21.0+sha512.66fd8278ee28935ce951792d34367ff3af5c432a2756445823029533835b8da529bbe0be5130afd56ed0713fb8789e47bad82d93bd5ae2fe54b15562d6276ef0",
   "scripts": {
     "init:ci": "rimraf reports coverage && mkdir -p reports coverage",
     "lint": "xo",
@@ -29,14 +27,12 @@
     "eslint-plugin",
     "eslintplugin",
     "fp",
-    "FP",
     "function",
     "functional",
     "programming",
     "lodash",
     "mutation",
     "immutable",
-    "function",
     "functions",
     "method",
     "methods"
@@ -51,10 +47,9 @@
     "eslint-plugin-n": "18.5.0",
     "rimraf": "6.1.4",
     "typescript": "7.0.2",
-    "xo": "2.0.2"
+    "xo": "5.0.1"
   },
   "peerDependencies": {
     "eslint": "^9.0.0 || ^10.0.0"
-  },
-  "packageManager": "pnpm@12.21.0+sha512.66fd8278ee28935ce951792d34367ff3af5c432a2756445823029533835b8da529bbe0be5130afd56ed0713fb8789e47bad82d93bd5ae2fe54b15562d6276ef0"
+  }
 }
