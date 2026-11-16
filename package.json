@@ -51,7 +51,7 @@
     "eslint-plugin-n": "18.5.0",
     "rimraf": "6.1.4",
     "typescript": "7.0.2",
-    "xo": "2.0.2"
+    "xo": "5.0.1"
   },
   "peerDependencies": {
     "eslint": "^9.0.0 || ^10.0.0"
