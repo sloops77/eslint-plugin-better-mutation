@@ -21,23 +21,26 @@ jobs:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6
+
       - name: Setup Node.js
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           node-version: lts/*
-          cache: yarn
+          cache: pnpm
 
       - name: Install dependencies
-        run: yarn install --frozen-lockfile
+        run: pnpm install --frozen-lockfile
 
       - name: Init CI
-        run: yarn run init:ci
+        run: pnpm run init:ci
 
       - name: Run lint
-        run: yarn run lint:ci
+        run: pnpm run lint:ci
 
       - name: Run tests
-        run: yarn run test:ci
+        run: pnpm run test:ci
 
       - name: Upload test reports
         if: always()
@@ -82,24 +85,27 @@ jobs:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6
+
       - name: Setup Node.js
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           node-version: ${{ matrix.node }}
-          cache: yarn
+          cache: pnpm
 
       - name: Install dependencies
-        run: yarn install --frozen-lockfile
+        run: pnpm install --frozen-lockfile
 
       - name: Install ESLint compatibility profile
         run: >
-          yarn add --dev --no-lockfile
+          pnpm add --save-dev
           "eslint@${{ matrix.eslint_profile.eslint }}"
           "eslint-plugin-eslint-plugin@${{ matrix.eslint_profile.eslint_plugin_eslint_plugin }}"
           "eslint-plugin-n@${{ matrix.eslint_profile.eslint_plugin_n }}"
 
       - name: Run lint
-        run: yarn lint
+        run: pnpm run lint
 
       - name: Run tests
-        run: yarn test
+        run: pnpm run test
