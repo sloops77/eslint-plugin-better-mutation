@@ -61,8 +61,23 @@ function isExportedFunctionDeclaration(node, identifier) {
   return isExportDeclaration(node) && isFunctionDeclaration(node?.declaration, identifier);
 }
 
-function isForStatementVariable(identifier, node, exemptedInitializers) {
-  return node.type === 'ForStatement' && isVariableDeclaration(node.init, identifier, false, exemptedInitializers);
+// A declaration in a loop header (`for (let i = 0; …)`, `for (let x of xs)`) is scoped to that loop,
+// so it is treated as if it were declared inside the loop body.
+function getLoopHeaderDeclaration(node) {
+  switch (node.type) {
+    case 'ForStatement': {
+      return node.init;
+    }
+
+    case 'ForInStatement':
+    case 'ForOfStatement': {
+      return node.left;
+    }
+
+    default: {
+      return undefined;
+    }
+  }
 }
 
 function getReference(node) {
@@ -157,7 +172,7 @@ function isScopedVariableIdentifier(identifier, node, allowFunctionProps, exempt
   }
 
   return someInBody(node, n => isVariableDeclaration(n, identifier, allowFunctionProps, exemptedInitializers))
-    || isForStatementVariable(identifier, node)
+    || isVariableDeclaration(getLoopHeaderDeclaration(node), identifier, allowFunctionProps, exemptedInitializers)
     || (!isEndOfBlock(node) && isScopedVariableIdentifier(identifier, node.parent, allowFunctionProps, exemptedInitializers));
 }
 
@@ -167,6 +182,7 @@ function isScopedLetIdentifier(identifier, node) {
   }
 
   return someInBody(node, n => isLetDeclaration(n, identifier))
+    || isLetDeclaration(getLoopHeaderDeclaration(node), identifier)
     || (!isEndOfBlock(node) && isScopedLetIdentifier(identifier, node.parent));
 }
 
