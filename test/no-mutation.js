@@ -213,6 +213,19 @@ ruleTester.run('no-mutation', rule, {
       code: 'for(let i = 0; i < 3; foo(), (bar(), i++)){}',
       options: [{allowUnaryOperatorInForLoops: true}],
     },
+    'for (let item of items) { item = normalize(item); }',
+    'outer: for (let item of items) { item = normalize(item); }',
+    'while (c) for (let item of items) { item = normalize(item); }',
+    'for (let k in obj) { k = k.trim(); }',
+    'for (let [key, value] of Object.entries(o)) { key = key.trim(); }',
+    'for (let item of items) { item.done = true; }',
+    'for (let a = Array.from(x); ;) { a[0] = 1; }',
+    'for (const a = Array.from(x); ;) { a[0] = 1; }',
+    'outer: for (const a = Array.from(x); ;) { a[0] = 1; }',
+    {
+      code: 'for (const a = createThing(); ;) { a.x = 1; }',
+      options: [{initializers: ['createThing']}],
+    },
   ],
   invalid: [
     {
@@ -434,6 +447,27 @@ ruleTester.run('no-mutation', rule, {
     {
       code: 'class Cache { reset() { Cache.size = 0; } }',
       options: [{functionProps: true}],
+      errors: [reassignmentError],
+    },
+    {
+      code: 'for (const item of items) { item.done = true; }',
+      errors: [reassignmentError],
+    },
+    {
+      code: 'outer: for (const item of items) { item.done = true; }',
+      errors: [reassignmentError],
+    },
+    {
+      code: 'for (var item of items) { item = normalize(item); }',
+      errors: [reassignmentError],
+    },
+    {
+      code: 'for (let item of items) { setTimeout(() => { item = 1; }); }',
+      errors: [reassignmentError],
+    },
+    {
+      code: 'for (const a = Array.from(x); ;) { a[0] = 1; }',
+      options: [{initializers: []}],
       errors: [reassignmentError],
     },
   ],

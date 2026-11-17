@@ -71,6 +71,15 @@ let b = 1;
 const c = 2;
 let a = 1; a = 2;
 
+// Loop header declarations are scoped to the loop, like declarations in its body
+for (let item of items) {
+  item = normalize(item);
+}
+
+for (const list = Array.from(source); ;) {
+  list[0] = 1;
+}
+
 function foo(a={}) {}
 
 /* eslint better-mutation/no-mutation: ["error", {"commonjs": true}] */
@@ -131,6 +140,14 @@ function foo(a) {
 }
 
 let a = 1; function bar() { a = 2; }
+
+for (const item of items) {
+  item.done = true; // `item` is an element of `items`
+}
+
+for (let item of items) {
+  setTimeout(() => { item = 1; }); // reassigned from another function
+}
 
 const sum = foldRight((acc, num) => acc += num, 0, [1, 2, 3]);
 
