@@ -1,10 +1,9 @@
 'use strict';
 
-const _ = require('lodash/fp');
-const {isScopedVariable, isScopedFunction, isExemptedReducer, isScopedLetVariableAssignment, isForLoopAfterthought} = require('./utils/common');
+const {matches, isScopedVariable, isScopedFunction, isExemptedReducer, isScopedLetVariableAssignment, isForLoopAfterthought} = require('./utils/common');
 const {defaultReducers, defaultInitializers} = require('./utils/defaults');
 
-const isModuleExports = _.matches({
+const isModuleExports = matches({
   type: 'MemberExpression',
   object: {
     type: 'Identifier',
@@ -16,11 +15,11 @@ const isModuleExports = _.matches({
   },
 });
 
-const isExports = _.matches({
+const isExports = matches({
   type: 'Identifier', name: 'exports',
 });
 
-const isPrototypeMemberExpression = _.matches({
+const isPrototypeMemberExpression = matches({
   type: 'MemberExpression',
   object: {
     object: {
@@ -34,26 +33,16 @@ const isPrototypeMemberExpression = _.matches({
 });
 
 function isModuleExportsMemberExpression(node) {
-  return _.overSome([
-    isExports,
-    isModuleExports,
-    candidate => candidate.type === 'MemberExpression' && isModuleExportsMemberExpression(candidate.object),
-  ])(node);
+  return isExports(node)
+    || isModuleExports(node)
+    || (node.type === 'MemberExpression' && isModuleExportsMemberExpression(node.object));
 }
 
-const isPrototypeAssignment = node => _.flow(
-  _.property('left'),
-  isPrototypeMemberExpression,
-)(node) && isScopedFunction(node.left, node.parent);
+const isPrototypeAssignment = node => isPrototypeMemberExpression(node?.left) && isScopedFunction(node.left, node.parent);
 
-const isCommonJsExport = _.flow(
-  _.property('left'),
-  _.overSome([
-    isExports,
-    isModuleExports,
-    isModuleExportsMemberExpression,
-  ]),
-);
+const isCommonJsExport = node => isExports(node?.left)
+  || isModuleExports(node?.left)
+  || isModuleExportsMemberExpression(node?.left);
 
 const ERROR_TYPES = {
   COMMON_JS: 'commonjsAssignmentError',
@@ -63,19 +52,19 @@ const ERROR_TYPES = {
 
 function makeException(exception) {
   if (!exception.object && !exception.property) {
-    return _.stubFalse;
+    return () => false;
   }
 
   let query = {type: 'MemberExpression'};
   if (exception.object) {
-    query = _.assign(query, {object: {type: 'Identifier', name: exception.object}});
+    query = {...query, object: {type: 'Identifier', name: exception.object}};
   }
 
   if (exception.property) {
-    query = _.assign(query, {property: {type: 'Identifier', name: exception.property}});
+    query = {...query, property: {type: 'Identifier', name: exception.property}};
   }
 
-  return _.matches(query);
+  return matches(query);
 }
 
 function isExemptedIdentifier(exemptedIdentifiers, node) {
@@ -83,8 +72,7 @@ function isExemptedIdentifier(exemptedIdentifiers, node) {
     return false;
   }
 
-  const matches = exemptedIdentifiers.some(matcher => matcher(node));
-  return matches
+  return exemptedIdentifiers.some(matcher => matcher(node))
     || (node.object.type === 'MemberExpression' && isExemptedIdentifier(exemptedIdentifiers, node.object));
 }
 
@@ -93,9 +81,9 @@ const create = function (context) {
   const allowFunctionProps = options.functionProps;
   const acceptCommonJs = options.commonjs;
   const acceptPrototypes = options.prototypes;
-  const exemptedIdentifiers = _.map(makeException, options.exceptions);
+  const exemptedIdentifiers = (options.exceptions ?? []).map(exception => makeException(exception));
   if (options.allowThis) {
-    exemptedIdentifiers.push(_.matches({type: 'MemberExpression', object: {type: 'ThisExpression'}}));
+    exemptedIdentifiers.push(matches({type: 'MemberExpression', object: {type: 'ThisExpression'}}));
   }
 
   const exemptedInitializers = context?.options?.[0]?.initializers ?? defaultInitializers;

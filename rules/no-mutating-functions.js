@@ -1,7 +1,7 @@
 'use strict';
 
-const _ = require('lodash/fp');
 const {
+  matches,
   isObjectExpression,
   isFunctionExpression,
   isScopedVariable,
@@ -36,15 +36,13 @@ const mutatingFunctions = [
   '_.updateWith',
 ];
 
-const isLodashFn = _.startsWith('_.');
-
 function buildIsMutatingFunction(ignoredMethods, useLodashFunctionImports) {
-  const matchesSpecs = _.flow(
-    _.map(fn => useLodashFunctionImports && isLodashFn(fn) ? fn.slice(2) : fn),
-    _.reject(fn => _.includes(fn, ignoredMethods)),
-    _.map(fn => {
-      const [objectName, propertyName] = _.split('.', fn);
-      return propertyName
+  const matchers = mutatingFunctions
+    .map(fn => useLodashFunctionImports && fn.startsWith('_.') ? fn.slice(2) : fn)
+    .filter(fn => !ignoredMethods.includes(fn))
+    .map(fn => {
+      const [objectName, propertyName] = fn.split('.', 2);
+      return matches(propertyName
         ? ({
           type: 'MemberExpression',
           object: {
@@ -59,11 +57,10 @@ function buildIsMutatingFunction(ignoredMethods, useLodashFunctionImports) {
         : ({
           type: 'Identifier',
           name: objectName,
-        });
-    }),
-  )(mutatingFunctions);
+        }));
+    });
 
-  return _.overSome(_.map(spec => _.matches(spec), matchesSpecs));
+  return node => matchers.some(matcher => matcher(node));
 }
 
 function isAllowedFirstArgument(arg, node, allowFunctionProps) {
@@ -71,10 +68,11 @@ function isAllowedFirstArgument(arg, node, allowFunctionProps) {
 }
 
 const create = function (context) {
-  const ignoredMethods = _.getOr([], ['options', 0, 'ignoreMethods'], context);
-  const useLodashFunctionImports = _.getOr(false, ['options', 0, 'useLodashFunctionImports'], context);
-  const allowFunctionProps = _.getOr(false, ['options', 0, 'functionProps'], context);
-  const exemptedReducerCallees = _.getOr(['reduce'], ['options', 0, 'reducers'], context);
+  const options = context.options?.[0];
+  const ignoredMethods = options?.ignoreMethods ?? [];
+  const useLodashFunctionImports = options?.useLodashFunctionImports ?? false;
+  const allowFunctionProps = options?.functionProps ?? false;
+  const exemptedReducerCallees = options?.reducers ?? ['reduce'];
   const isMutatingFunction = buildIsMutatingFunction(ignoredMethods, useLodashFunctionImports);
 
   return {
