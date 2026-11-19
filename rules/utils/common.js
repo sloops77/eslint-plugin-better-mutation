@@ -20,9 +20,6 @@ const isConditionalExpression = ofType('ConditionalExpression');
 const isClassOrFunctionDeclaration = ofType('ClassDeclaration', 'FunctionDeclaration');
 const isEndOfBlock = ofType('Program', 'FunctionDeclaration', 'ClassDeclaration', 'FunctionExpression', 'ArrowFunctionExpression');
 
-// Statement lists (Program, blocks, class bodies) are arrays; other nodes have no statements to search.
-const someInBody = (node, predicate) => Array.isArray(node.body) && node.body.some(statement => predicate(statement));
-
 const buildInitializer = callee => {
   if (callee.name) {
     return callee.name;
@@ -57,12 +54,6 @@ function isFunctionDeclaration(node, identifier) {
   return isClassOrFunctionDeclaration(node) && identifier !== undefined && node.id?.name === identifier;
 }
 
-function isExportedFunctionDeclaration(node, identifier) {
-  return isExportDeclaration(node) && isFunctionDeclaration(node?.declaration, identifier);
-}
-
-// A declaration in a loop header (`for (let i = 0; …)`, `for (let x of xs)`) is scoped to that loop,
-// so it is treated as if it were declared inside the loop body.
 function getLoopHeaderDeclaration(node) {
   switch (node.type) {
     case 'ForStatement': {
@@ -166,24 +157,53 @@ function isLetDeclaration(node, identifier) {
   return declaration !== null && declaration !== undefined;
 }
 
-function isScopedVariableIdentifier(identifier, node, allowFunctionProps, exemptedInitializers) {
-  if (node === null || node === undefined) {
-    return false;
+// The declaration in `statement` that binds `identifier`, if any. An exported function or class
+// declaration counts as the declaration it wraps.
+function getDeclarationOf(identifier, statement) {
+  if (statement?.type === 'VariableDeclaration') {
+    return getIdentifierDeclaration(identifier, statement) ? statement : undefined;
   }
 
-  return someInBody(node, n => isVariableDeclaration(n, identifier, allowFunctionProps, exemptedInitializers))
-    || isVariableDeclaration(getLoopHeaderDeclaration(node), identifier, allowFunctionProps, exemptedInitializers)
-    || (!isEndOfBlock(node) && isScopedVariableIdentifier(identifier, node.parent, allowFunctionProps, exemptedInitializers));
+  const declaration = isExportDeclaration(statement) ? statement.declaration : statement;
+  return isFunctionDeclaration(declaration, identifier) ? declaration : undefined;
+}
+
+// The nearest declaration of `identifier` visible from `node`, searching outwards through statement lists
+// (Program, blocks, class bodies) and loop headers up to the enclosing function or program. A declaration in a
+// loop header (`for (let i = 0; …)`, `for (const x of xs)`) is scoped to that loop, and a function or class
+// declaration's own name is in scope inside its body. The nearest declaration shadows any outer one, so the
+// search stops there whatever kind of declaration it is.
+function findDeclaration(identifier, node) {
+  if (!identifier) {
+    return undefined;
+  }
+
+  let current = node;
+  while (current) {
+    const statements = Array.isArray(current.body) ? current.body : [getLoopHeaderDeclaration(current)];
+    for (const statement of statements) {
+      const declaration = getDeclarationOf(identifier, statement);
+      if (declaration) {
+        return declaration;
+      }
+    }
+
+    if (isEndOfBlock(current)) {
+      return isFunctionDeclaration(current, identifier) ? current : undefined;
+    }
+
+    current = current.parent;
+  }
+
+  return undefined;
+}
+
+function isScopedVariableIdentifier(identifier, node, allowFunctionProps, exemptedInitializers) {
+  return isVariableDeclaration(findDeclaration(identifier, node), identifier, allowFunctionProps, exemptedInitializers);
 }
 
 function isScopedLetIdentifier(identifier, node) {
-  if (node === null || node === undefined) {
-    return false;
-  }
-
-  return someInBody(node, n => isLetDeclaration(n, identifier))
-    || isLetDeclaration(getLoopHeaderDeclaration(node), identifier)
-    || (!isEndOfBlock(node) && isScopedLetIdentifier(identifier, node.parent));
+  return isLetDeclaration(findDeclaration(identifier, node), identifier);
 }
 
 function isScopedLetVariableAssignment(node) {
@@ -201,18 +221,7 @@ function isScopedVariable(arg, node, allowFunctionProps, exemptedInitializers) {
 }
 
 function isScopedFunctionIdentifier(identifier, node) {
-  if (node === null || node === undefined) {
-    return false;
-  }
-
-  if (someInBody(node, n => isFunctionDeclaration(n, identifier) || isExportedFunctionDeclaration(n, identifier))) {
-    return true;
-  }
-
-  // A function or class declaration's own name is in scope inside its body.
-  return isEndOfBlock(node)
-    ? isFunctionDeclaration(node, identifier)
-    : isScopedFunctionIdentifier(identifier, node.parent);
+  return isFunctionDeclaration(findDeclaration(identifier, node), identifier);
 }
 
 function isScopedFunction(arg, node) {
