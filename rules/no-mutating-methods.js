@@ -1,6 +1,6 @@
 'use strict';
 
-const {isObjectExpression, isScopedVariable, isExemptedReducer, isValidInit} = require('./utils/common');
+const {isObjectExpression, isExemptedReducer, isValidInit} = require('./utils/common');
 const {defaultInitializers, defaultReducers} = require('./utils/defaults');
 
 const mutatingMethods = new Set([
@@ -33,6 +33,7 @@ const create = function (context) {
   const allowedObjects = options.allowedObjects || [];
   const exemptedInitializers = context?.options?.[0]?.initializers ?? defaultInitializers;
   const exemptedReducerCallees = context?.options?.[0]?.reducers ?? defaultReducers;
+  const scopeOptions = {sourceCode: context.sourceCode, allowFunctionProps: false, exemptedInitializers};
 
   return {
     CallExpression(node) {
@@ -43,8 +44,7 @@ const create = function (context) {
 
       const name = getNameIfPropertyIsIdentifier(node.callee.property) || getNameIfPropertyIsLiteral(node.callee.property);
       if (name
-        && !isScopedVariable(node.callee.object, node.parent, false, exemptedInitializers)
-        && !isValidInit(node.callee.object, node.parent, false, exemptedInitializers)
+        && !isValidInit(scopeOptions, node.callee.object)
         && !isObjectExpression(node.callee.object)
         && !isExemptedReducer(exemptedReducerCallees, node.parent)) {
         context.report({

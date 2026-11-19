@@ -38,7 +38,7 @@ function isModuleExportsMemberExpression(node) {
     || (node.type === 'MemberExpression' && isModuleExportsMemberExpression(node.object));
 }
 
-const isPrototypeAssignment = node => isPrototypeMemberExpression(node?.left) && isScopedFunction(node.left, node.parent);
+const isPrototypeAssignment = (sourceCode, node) => isPrototypeMemberExpression(node?.left) && isScopedFunction(sourceCode, node.left);
 
 const isCommonJsExport = node => isExports(node?.left)
   || isModuleExports(node?.left)
@@ -77,6 +77,7 @@ function isExemptedIdentifier(exemptedIdentifiers, node) {
 }
 
 const create = function (context) {
+  const {sourceCode} = context;
   const options = context.options[0] || {};
   const allowFunctionProps = options.functionProps;
   const acceptCommonJs = options.commonjs;
@@ -88,17 +89,18 @@ const create = function (context) {
 
   const exemptedInitializers = context?.options?.[0]?.initializers ?? defaultInitializers;
   const exemptedReducerCallees = context?.options?.[0]?.reducers ?? defaultReducers;
+  const scopeOptions = {sourceCode, allowFunctionProps, exemptedInitializers};
 
   return {
     AssignmentExpression(node) {
       const isCommonJs = isCommonJsExport(node);
-      const isPrototype = isPrototypeAssignment(node);
+      const isPrototype = isPrototypeAssignment(sourceCode, node);
 
       if ((isCommonJs && acceptCommonJs)
         || (isPrototype && acceptPrototypes)
         || isExemptedIdentifier(exemptedIdentifiers, node.left)
-        || isScopedLetVariableAssignment(node)
-        || isScopedVariable(node.left, node.parent, allowFunctionProps, exemptedInitializers)
+        || isScopedLetVariableAssignment(sourceCode, node)
+        || isScopedVariable(scopeOptions, node.left)
         || isExemptedReducer(exemptedReducerCallees, node.parent)) {
         return;
       }
