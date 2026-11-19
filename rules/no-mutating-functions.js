@@ -63,8 +63,8 @@ function buildIsMutatingFunction(ignoredMethods, useLodashFunctionImports) {
   return node => matchers.some(matcher => matcher(node));
 }
 
-function isAllowedFirstArgument(arg, node, allowFunctionProps) {
-  return isObjectExpression(arg) || isFunctionExpression(arg) || isScopedVariable(arg, node.parent, allowFunctionProps);
+function isAllowedFirstArgument(scopeOptions, arg) {
+  return isObjectExpression(arg) || isFunctionExpression(arg) || isScopedVariable(scopeOptions, arg);
 }
 
 const create = function (context) {
@@ -74,10 +74,11 @@ const create = function (context) {
   const allowFunctionProps = options?.functionProps ?? false;
   const exemptedReducerCallees = options?.reducers ?? ['reduce'];
   const isMutatingFunction = buildIsMutatingFunction(ignoredMethods, useLodashFunctionImports);
+  const scopeOptions = {sourceCode: context.sourceCode, allowFunctionProps};
 
   return {
     CallExpression(node) {
-      if (isMutatingFunction(node.callee) && !isAllowedFirstArgument(node.arguments[0], node, allowFunctionProps) && !isExemptedReducer(exemptedReducerCallees, node.parent)) {
+      if (isMutatingFunction(node.callee) && !isAllowedFirstArgument(scopeOptions, node.arguments[0]) && !isExemptedReducer(exemptedReducerCallees, node.parent)) {
         context.report({
           node,
           messageId: 'unsafeMutatingFunction',
