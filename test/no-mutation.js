@@ -226,6 +226,7 @@ ruleTester.run('no-mutation', rule, {
       code: 'for (const a = createThing(); ;) { a.x = 1; }',
       options: [{initializers: ['createThing']}],
     },
+    'function f(source) { const a = source; { const a = []; a.x = 1; } }',
   ],
   invalid: [
     {
@@ -468,6 +469,38 @@ ruleTester.run('no-mutation', rule, {
     {
       code: 'for (const a = Array.from(x); ;) { a[0] = 1; }',
       options: [{initializers: []}],
+      errors: [reassignmentError],
+    },
+    // The nearest declaration shadows outer ones, even when its initializer is not allowed.
+    {
+      code: 'function f(source) { for (const a = Array.from(source); ;) { const a = source; a[0] = 1; } }',
+      errors: [reassignmentError],
+    },
+    {
+      code: 'function f(source) { const a = []; { const a = source; a.x = 1; } }',
+      errors: [reassignmentError],
+    },
+    {
+      code: 'function f(source) { let a = []; { const a = source; a.x = 1; } }',
+      errors: [reassignmentError],
+    },
+    {
+      code: 'let item = {}; for (const item of items) { item.done = true; }',
+      errors: [reassignmentError],
+    },
+    {
+      code: 'function foo() {} function f(source) { const foo = source; foo.metadata = {}; }',
+      options: [{functionProps: true}],
+      errors: [reassignmentError],
+    },
+    {
+      code: 'function c(e) { let c = e.length - 1; c += 1; }',
+      options: [{functionProps: true}],
+      errors: [reassignmentError],
+    },
+    // A destructuring default (`let {a = 1} = o`) is not a declaration of `this`.
+    {
+      code: 'function f(o) { let {a = 1} = o; this.list = []; }',
       errors: [reassignmentError],
     },
   ],

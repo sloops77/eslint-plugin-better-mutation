@@ -25,6 +25,7 @@ ruleTester.run('no-mutating-methods', rule, {
     'value["foo"](a)',
     '[].push(a)',
     'function foo() { const a = []; a.push(5); return a; }',
+    'function f(source) { const a = source; { const a = []; a.push(1); } }',
     {
       code: '_.push(a, b)',
       options: [{
@@ -178,6 +179,15 @@ ruleTester.run('no-mutating-methods', rule, {
     {
       code: 'let array = [1,2,3]; array.reduce((acc, x) => { acc.push(1); return acc; });',
       options: [{reducers: []}],
+      errors: [methodError('push')],
+    },
+    // The nearest declaration shadows outer ones, even when its initializer is not allowed.
+    {
+      code: 'function f(source) { for (const a = Array.from(source); ;) { const a = source; a.push(1); } }',
+      errors: [methodError('push')],
+    },
+    {
+      code: 'function f(source) { const a = []; { const a = source; a.push(1); } }',
       errors: [methodError('push')],
     },
   ],

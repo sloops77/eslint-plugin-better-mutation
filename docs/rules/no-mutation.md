@@ -149,6 +149,14 @@ for (let item of items) {
   setTimeout(() => { item = 1; }); // reassigned from another function
 }
 
+function update(source) {
+  const list = [];
+  {
+    const list = source; // the nearest declaration of `list` is the one that counts
+    list[0] = 1;
+  }
+}
+
 const sum = foldRight((acc, num) => acc += num, 0, [1, 2, 3]);
 
 const x = Initializer.init(88);
