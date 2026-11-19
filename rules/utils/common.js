@@ -10,7 +10,6 @@ const matches = spec => value => isMatch(value, spec);
 const ofType = (...types) => node => types.includes(node?.type);
 
 const isReference = ofType('MemberExpression', 'Identifier');
-const isExportDeclaration = ofType('ExportDefaultDeclaration', 'ExportNamedDeclaration');
 const isLiteral = ofType('ObjectExpression', 'ArrayExpression', 'Literal');
 const isObjectExpression = ofType('ObjectExpression', 'ArrayExpression');
 const isNewExpression = ofType('NewExpression');
@@ -50,183 +49,107 @@ function getBlockAncestor(node) {
   return current;
 }
 
-function isFunctionDeclaration(node, identifier) {
-  return isClassOrFunctionDeclaration(node) && identifier !== undefined && node.id?.name === identifier;
+function getLeftMostObject(node) {
+  const object = node?.object;
+  return object ? getLeftMostObject(object) : node;
 }
 
-function getLoopHeaderDeclaration(node) {
-  switch (node.type) {
-    case 'ForStatement': {
-      return node.init;
+// The variable `identifier` refers to, found with ESLint's scope analysis. It knows every kind of binding
+// (parameters, `catch` clauses, destructuring, `switch` cases, hoisted `var`s), so the nearest declaration
+// of a name always shadows outer ones.
+function findVariable(sourceCode, identifier) {
+  for (let scope = sourceCode.getScope(identifier); scope; scope = scope.upper) {
+    const variable = scope.set.get(identifier.name);
+    if (variable) {
+      return variable;
     }
-
-    case 'ForInStatement':
-    case 'ForOfStatement': {
-      return node.left;
-    }
-
-    default: {
-      return undefined;
-    }
-  }
-}
-
-function getReference(node) {
-  switch (node.type) {
-    case 'MemberExpression': {
-      return node.object;
-    }
-
-    case 'Identifier': {
-      return node;
-    }
-
-    default: {
-      return undefined;
-    }
-  }
-}
-
-function isValidInit(rhsExpression, node, allowFunctionProps, exemptedInitializers) {
-  return rhsExpression !== null && rhsExpression !== undefined && (
-    isLiteral(rhsExpression)
-    || (isNewExpression(rhsExpression) && rhsExpression.callee.name !== 'Object') // In JS, the Object constructor doesnt allocate memory so it is buggy and should be avoided
-    || isExemptedInitializer(rhsExpression, exemptedInitializers)
-    // TODO Replace/Add the following handling for exemptedInitializers by permitting 'let a = c(); a = 1;' by ensuring that function c() { return  {} };
-    // isCallExpression(rhsExpression) /* && called Function always returns a ValidInit */ ||
-    || (isReference(rhsExpression) && isScopedVariable(getReference(rhsExpression), node.parent, allowFunctionProps, exemptedInitializers))
-    || (isConditionalExpression(rhsExpression) && isValidInit(rhsExpression.alternate, node, allowFunctionProps, exemptedInitializers) && isValidInit(rhsExpression.consequent, node, allowFunctionProps, exemptedInitializers))
-  );
-}
-
-function getLeftMostObject(arg) {
-  const object = arg?.object;
-  return object ? getLeftMostObject(object) : arg;
-}
-
-function getIdentifierDeclaration(identifier, node) {
-  const declarations = node?.declarations || [];
-  return declarations.find(n => {
-    if (n.type !== 'VariableDeclarator') {
-      return false;
-    }
-
-    const {id} = n;
-    if (id?.type === 'ObjectPattern') {
-      const destructuredProperties = id.properties || [];
-      return destructuredProperties.find(prop => prop.value?.name === identifier || (prop.type === 'RestElement' && prop.argument?.name === identifier));
-    }
-
-    if (id?.type === 'ArrayPattern') {
-      const destructuredElements = id.elements || [];
-      return destructuredElements.find(element => element?.name === identifier || (element?.type === 'RestElement' && element.argument?.name === identifier));
-    }
-
-    return id?.name === identifier;
-  });
-}
-
-function isVariableDeclaration(node, identifier, allowFunctionProps, exemptedInitializers) {
-  const finalNode = node || {}; // Todo not sure about this defaulting. seems to fix weird bug
-
-  if (finalNode.type !== 'VariableDeclaration') {
-    return false;
-  }
-
-  const declaration = getIdentifierDeclaration(identifier, finalNode);
-  // Debug('%j', {
-  //   f: 'isVariableDeclaration',
-  //   nodeType: finalNode.type,
-  //   declarationType: declaration?.type,
-  //   isValidInit: isValidInit(_.get('init', declaration), finalNode, exemptedInitializers),
-  // });
-  return (
-    declaration !== null && declaration !== undefined
-    && isValidInit(declaration.init, finalNode, allowFunctionProps, exemptedInitializers)
-  );
-}
-
-function isLetDeclaration(node, identifier) {
-  const finalNode = node || {}; // Todo not sure about this defaulting. seems to fix weird bug
-
-  if (finalNode.type !== 'VariableDeclaration' || finalNode.kind !== 'let') {
-    return false;
-  }
-
-  const declaration = getIdentifierDeclaration(identifier, finalNode);
-  return declaration !== null && declaration !== undefined;
-}
-
-// The declaration in `statement` that binds `identifier`, if any. An exported function or class
-// declaration counts as the declaration it wraps.
-function getDeclarationOf(identifier, statement) {
-  if (statement?.type === 'VariableDeclaration') {
-    return getIdentifierDeclaration(identifier, statement) ? statement : undefined;
-  }
-
-  const declaration = isExportDeclaration(statement) ? statement.declaration : statement;
-  return isFunctionDeclaration(declaration, identifier) ? declaration : undefined;
-}
-
-// The nearest declaration of `identifier` visible from `node`, searching outwards through statement lists
-// (Program, blocks, class bodies) and loop headers up to the enclosing function or program. A declaration in a
-// loop header (`for (let i = 0; …)`, `for (const x of xs)`) is scoped to that loop, and a function or class
-// declaration's own name is in scope inside its body. The nearest declaration shadows any outer one, so the
-// search stops there whatever kind of declaration it is.
-function findDeclaration(identifier, node) {
-  if (!identifier) {
-    return undefined;
-  }
-
-  let current = node;
-  while (current) {
-    const statements = Array.isArray(current.body) ? current.body : [getLoopHeaderDeclaration(current)];
-    for (const statement of statements) {
-      const declaration = getDeclarationOf(identifier, statement);
-      if (declaration) {
-        return declaration;
-      }
-    }
-
-    if (isEndOfBlock(current)) {
-      return isFunctionDeclaration(current, identifier) ? current : undefined;
-    }
-
-    current = current.parent;
   }
 
   return undefined;
 }
 
-function isScopedVariableIdentifier(identifier, node, allowFunctionProps, exemptedInitializers) {
-  return isVariableDeclaration(findDeclaration(identifier, node), identifier, allowFunctionProps, exemptedInitializers);
+// Code owns the variables and functions declared in the same function as itself (or at the top level of the
+// same program), including declarations in loop headers. A function or class declaration's own name is also
+// owned by its body. Parameters, `catch` clauses, imports and exported variables (which importers can
+// observe) are not owned.
+function isOwnedDefinition(definition, owner) {
+  switch (definition.type) {
+    case 'Variable': {
+      return definition.parent.parent.type !== 'ExportNamedDeclaration' && getBlockAncestor(definition.parent) === owner;
+    }
+
+    case 'FunctionName':
+    case 'ClassName': {
+      return isClassOrFunctionDeclaration(definition.node)
+        && (definition.node === owner || getBlockAncestor(definition.node.parent) === owner);
+    }
+
+    default: {
+      return false;
+    }
+  }
 }
 
-function isScopedLetIdentifier(identifier, node) {
-  return isLetDeclaration(findDeclaration(identifier, node), identifier);
+// The variable that `node` (or, for `a.b.c`, its left-most object) refers to, if the code at `node` owns
+// every declaration of it.
+function getOwnedVariable(sourceCode, node) {
+  const identifier = getLeftMostObject(node);
+  if (identifier?.type !== 'Identifier') {
+    return undefined;
+  }
+
+  const variable = findVariable(sourceCode, identifier);
+  const owner = getBlockAncestor(identifier);
+  return variable && variable.defs.length > 0 && variable.defs.every(definition => isOwnedDefinition(definition, owner))
+    ? variable
+    : undefined;
 }
 
-function isScopedLetVariableAssignment(node) {
-  if (node?.operator !== '=') {
+const isLetDefinition = definition => definition.type === 'Variable' && definition.parent.kind === 'let';
+const isFunctionDefinition = definition => definition.type === 'FunctionName' || definition.type === 'ClassName';
+
+// `scopeOptions` is `{sourceCode, allowFunctionProps, exemptedInitializers}`. `visiting` holds the variables whose
+// initializers are being checked, to stop at circular ones like `var a = a`.
+function isValidInit(scopeOptions, rhsExpression, visiting = new Set()) {
+  return rhsExpression !== null && rhsExpression !== undefined && (
+    isLiteral(rhsExpression)
+    || (isNewExpression(rhsExpression) && rhsExpression.callee.name !== 'Object') // In JS, the Object constructor doesnt allocate memory so it is buggy and should be avoided
+    || isExemptedInitializer(rhsExpression, scopeOptions.exemptedInitializers)
+    // TODO Replace/Add the following handling for exemptedInitializers by permitting 'let a = c(); a = 1;' by ensuring that function c() { return  {} };
+    // isCallExpression(rhsExpression) /* && called Function always returns a ValidInit */ ||
+    || (isReference(rhsExpression) && isScopedVariable(scopeOptions, rhsExpression, visiting))
+    || (isConditionalExpression(rhsExpression)
+      && isValidInit(scopeOptions, rhsExpression.alternate, visiting)
+      && isValidInit(scopeOptions, rhsExpression.consequent, visiting))
+  );
+}
+
+// Whether `node` refers to an owned variable whose initializers all allocate a new value (see isValidInit),
+// or, with `allowFunctionProps`, to an owned function or class declaration.
+function isScopedVariable(scopeOptions, node, visiting = new Set()) {
+  const variable = getOwnedVariable(scopeOptions.sourceCode, node);
+  if (!variable || visiting.has(variable)) {
     return false;
   }
 
-  const identifier = getLeftMostObject(node.left)?.name;
-  return isScopedLetIdentifier(identifier, node.parent);
+  if (scopeOptions.allowFunctionProps && variable.defs.some(definition => isFunctionDefinition(definition))) {
+    return true;
+  }
+
+  // A `var` may be declared more than once; declarations without an initializer don't assign to it.
+  const initializers = variable.defs.map(definition => definition.node.init).filter(Boolean);
+  const nowVisiting = new Set([...visiting, variable]);
+  return initializers.length > 0
+    && initializers.every(init => isValidInit(scopeOptions, init, nowVisiting));
 }
 
-function isScopedVariable(arg, node, allowFunctionProps, exemptedInitializers) {
-  const identifier = getLeftMostObject(arg)?.name;
-  return identifier ? (allowFunctionProps && isScopedFunctionIdentifier(identifier, node)) || isScopedVariableIdentifier(identifier, node, allowFunctionProps, exemptedInitializers) : false;
+function isScopedLetVariableAssignment(sourceCode, node) {
+  return node?.operator === '='
+    && (getOwnedVariable(sourceCode, node.left)?.defs.some(definition => isLetDefinition(definition)) ?? false);
 }
 
-function isScopedFunctionIdentifier(identifier, node) {
-  return isFunctionDeclaration(findDeclaration(identifier, node), identifier);
-}
-
-function isScopedFunction(arg, node) {
-  const identifier = getLeftMostObject(arg)?.name;
-  return isScopedFunctionIdentifier(identifier, node);
+function isScopedFunction(sourceCode, node) {
+  return getOwnedVariable(sourceCode, node)?.defs.some(definition => isFunctionDefinition(definition)) ?? false;
 }
 
 function isExemptedReducer(exemptedReducerCallees, node) {

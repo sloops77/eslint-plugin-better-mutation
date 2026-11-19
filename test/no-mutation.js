@@ -227,6 +227,16 @@ ruleTester.run('no-mutation', rule, {
       options: [{initializers: ['createThing']}],
     },
     'function f(source) { const a = source; { const a = []; a.x = 1; } }',
+    // Every kind of declaration is found, wherever it is.
+    'switch (x) { case 0: let a = 1; a = 2; }',
+    'function f(o) { let {a = 1} = o; a = 2; }',
+    'function f(o) { let {a: {b}} = o; b = 2; }',
+    'function f(c) { if (c) { var a = []; } a.x = 1; }',
+    'function f() { for (var i = 0, a = []; i < 3; i += 1) {} a.x = 1; }',
+    {
+      code: 'function outer() { var f = f; function f() {} f.metadata = {}; }',
+      options: [{functionProps: true}],
+    },
   ],
   invalid: [
     {
@@ -501,6 +511,34 @@ ruleTester.run('no-mutation', rule, {
     // A destructuring default (`let {a = 1} = o`) is not a declaration of `this`.
     {
       code: 'function f(o) { let {a = 1} = o; this.list = []; }',
+      errors: [reassignmentError],
+    },
+    { // A catch parameter shadows the loop variable
+      code: 'for (let item of [0]) { try { throw shared; } catch (item) { item.done = true; } }',
+      errors: [reassignmentError],
+    },
+    { // A switch case declaration shadows the loop variable
+      code: 'for (let item of [0]) { switch (0) { case 0: const item = shared; item.done = true; } }',
+      errors: [reassignmentError],
+    },
+    { // A destructuring default shadows the loop variable
+      code: 'function f(source) { for (let item of [0]) { const {item = null} = source; item.done = true; } }',
+      errors: [reassignmentError],
+    },
+    { // A nested destructuring pattern shadows the loop variable
+      code: 'function f(source) { for (let item of [0]) { const {a: {item}} = source; item.done = true; } }',
+      errors: [reassignmentError],
+    },
+    { // A circular initializer is not a valid one (and does not overflow the stack)
+      code: 'function outer() { var f = f; f.metadata = {}; }',
+      errors: [reassignmentError],
+    },
+    { // Every initializer of a redeclared var must be valid
+      code: 'function f(source) { var a = []; var a = source; a.x = 1; }',
+      errors: [reassignmentError],
+    },
+    { // Importers can observe an exported variable
+      code: 'export let count = 0; count = 1;',
       errors: [reassignmentError],
     },
   ],
