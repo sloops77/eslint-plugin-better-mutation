@@ -213,6 +213,30 @@ ruleTester.run('no-mutation', rule, {
       code: 'for(let i = 0; i < 3; foo(), (bar(), i++)){}',
       options: [{allowUnaryOperatorInForLoops: true}],
     },
+    'for (let item of items) { item = normalize(item); }',
+    'outer: for (let item of items) { item = normalize(item); }',
+    'while (c) for (let item of items) { item = normalize(item); }',
+    'for (let k in obj) { k = k.trim(); }',
+    'for (let [key, value] of Object.entries(o)) { key = key.trim(); }',
+    'for (let item of items) { item.done = true; }',
+    'for (let a = Array.from(x); ;) { a[0] = 1; }',
+    'for (const a = Array.from(x); ;) { a[0] = 1; }',
+    'outer: for (const a = Array.from(x); ;) { a[0] = 1; }',
+    {
+      code: 'for (const a = createThing(); ;) { a.x = 1; }',
+      options: [{initializers: ['createThing']}],
+    },
+    'function f(source) { const a = source; { const a = []; a.x = 1; } }',
+    // Every kind of declaration is found, wherever it is.
+    'switch (x) { case 0: let a = 1; a = 2; }',
+    'function f(o) { let {a = 1} = o; a = 2; }',
+    'function f(o) { let {a: {b}} = o; b = 2; }',
+    'function f(c) { if (c) { var a = []; } a.x = 1; }',
+    'function f() { for (var i = 0, a = []; i < 3; i += 1) {} a.x = 1; }',
+    {
+      code: 'function outer() { var f = f; function f() {} f.metadata = {}; }',
+      options: [{functionProps: true}],
+    },
   ],
   invalid: [
     {
@@ -434,6 +458,87 @@ ruleTester.run('no-mutation', rule, {
     {
       code: 'class Cache { reset() { Cache.size = 0; } }',
       options: [{functionProps: true}],
+      errors: [reassignmentError],
+    },
+    {
+      code: 'for (const item of items) { item.done = true; }',
+      errors: [reassignmentError],
+    },
+    {
+      code: 'outer: for (const item of items) { item.done = true; }',
+      errors: [reassignmentError],
+    },
+    {
+      code: 'for (var item of items) { item = normalize(item); }',
+      errors: [reassignmentError],
+    },
+    {
+      code: 'for (let item of items) { setTimeout(() => { item = 1; }); }',
+      errors: [reassignmentError],
+    },
+    {
+      code: 'for (const a = Array.from(x); ;) { a[0] = 1; }',
+      options: [{initializers: []}],
+      errors: [reassignmentError],
+    },
+    // The nearest declaration shadows outer ones, even when its initializer is not allowed.
+    {
+      code: 'function f(source) { for (const a = Array.from(source); ;) { const a = source; a[0] = 1; } }',
+      errors: [reassignmentError],
+    },
+    {
+      code: 'function f(source) { const a = []; { const a = source; a.x = 1; } }',
+      errors: [reassignmentError],
+    },
+    {
+      code: 'function f(source) { let a = []; { const a = source; a.x = 1; } }',
+      errors: [reassignmentError],
+    },
+    {
+      code: 'let item = {}; for (const item of items) { item.done = true; }',
+      errors: [reassignmentError],
+    },
+    {
+      code: 'function foo() {} function f(source) { const foo = source; foo.metadata = {}; }',
+      options: [{functionProps: true}],
+      errors: [reassignmentError],
+    },
+    {
+      code: 'function c(e) { let c = e.length - 1; c += 1; }',
+      options: [{functionProps: true}],
+      errors: [reassignmentError],
+    },
+    // A destructuring default (`let {a = 1} = o`) is not a declaration of `this`.
+    {
+      code: 'function f(o) { let {a = 1} = o; this.list = []; }',
+      errors: [reassignmentError],
+    },
+    { // A catch parameter shadows the loop variable
+      code: 'for (let item of [0]) { try { throw shared; } catch (item) { item.done = true; } }',
+      errors: [reassignmentError],
+    },
+    { // A switch case declaration shadows the loop variable
+      code: 'for (let item of [0]) { switch (0) { case 0: const item = shared; item.done = true; } }',
+      errors: [reassignmentError],
+    },
+    { // A destructuring default shadows the loop variable
+      code: 'function f(source) { for (let item of [0]) { const {item = null} = source; item.done = true; } }',
+      errors: [reassignmentError],
+    },
+    { // A nested destructuring pattern shadows the loop variable
+      code: 'function f(source) { for (let item of [0]) { const {a: {item}} = source; item.done = true; } }',
+      errors: [reassignmentError],
+    },
+    { // A circular initializer is not a valid one (and does not overflow the stack)
+      code: 'function outer() { var f = f; f.metadata = {}; }',
+      errors: [reassignmentError],
+    },
+    { // Every initializer of a redeclared var must be valid
+      code: 'function f(source) { var a = []; var a = source; a.x = 1; }',
+      errors: [reassignmentError],
+    },
+    { // Importers can observe an exported variable
+      code: 'export let count = 0; count = 1;',
       errors: [reassignmentError],
     },
   ],
