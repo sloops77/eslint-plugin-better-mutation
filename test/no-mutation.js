@@ -169,6 +169,14 @@ ruleTester.run('no-mutation', rule, {
       options: [{functionProps: true}],
     },
     {
+      code: 'function _debug() { const data = require("debug"); _debug = function () { return data; }; return data; }',
+      options: [{functionProps: true}],
+    },
+    {
+      code: 'function counter() { counter.calls = (counter.calls || 0) + 1; }',
+      options: [{functionProps: true}],
+    },
+    {
       code: 'function Clazz() { }; Clazz.prototype.foo = function() {}',
       options: [{prototypes: true}],
     },
@@ -411,6 +419,21 @@ ruleTester.run('no-mutation', rule, {
     },
     {
       code: 'let a, b; b += 2;',
+      errors: [reassignmentError],
+    },
+    {
+      code: 'function _debug() {} function other() { _debug = function () {}; }',
+      options: [{functionProps: true}],
+      errors: [reassignmentError],
+    },
+    {
+      code: 'function outer() { function inner() { outer = 1; } }',
+      options: [{functionProps: true}],
+      errors: [reassignmentError],
+    },
+    {
+      code: 'class Cache { reset() { Cache.size = 0; } }',
+      options: [{functionProps: true}],
       errors: [reassignmentError],
     },
   ],
