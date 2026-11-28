@@ -185,8 +185,8 @@ importers:
         specifier: 7.6.2
         version: 7.6.2(eslint@10.15.0(jiti@2.7.0)(supports-color@10.2.2))
       eslint-plugin-n:
-        specifier: 18.5.0
-        version: 18.5.0(eslint@10.15.0(jiti@2.7.0)(supports-color@10.2.2))(typescript@7.0.2)
+        specifier: 18.6.0
+        version: 18.6.0(eslint@10.15.0(jiti@2.7.0)(supports-color@10.2.2))(typescript@7.0.2)
       rimraf:
         specifier: 6.1.4
         version: 6.1.4
@@ -1022,8 +1022,8 @@ packages:
       typescript:
         optional: true
 
-  eslint-plugin-n@18.5.0:
-    resolution: {integrity: sha512-M7uF6MTN/An+AXqvyIbXq7npJIZOkd5eKo8iMMvWrcDVNyZVdA6TF2lw01aKQfCEidRfpnR78GhAjZorlXNHiw==}
+  eslint-plugin-n@18.6.0:
+    resolution: {integrity: sha512-/UcgYfzZhQ6E/b/j4B9gMt6PotgTrF9lT/qMYnPzXYax5UR127J60I1BoF1R1Oa0Kq7LGhY0JUEm93JucJIbWA==}
     engines: {node: ^20.19.0 || ^22.13.0 || >=24}
     peerDependencies:
       eslint: '>=8.57.1'
@@ -2606,7 +2606,7 @@ snapshots:
       eslint-plugin-ava: 17.0.1(eslint@10.15.0(jiti@2.7.0)(supports-color@10.2.2))
       eslint-plugin-import-x: 4.18.1(eslint@10.15.0(jiti@2.7.0)(supports-color@10.2.2))(supports-color@10.2.2)
       eslint-plugin-jsdoc: 64.5.4(eslint@10.15.0(jiti@2.7.0)(supports-color@10.2.2))(supports-color@10.2.2)(typescript@6.0.3)
-      eslint-plugin-n: 18.5.0(eslint@10.15.0(jiti@2.7.0)(supports-color@10.2.2))(typescript@6.0.3)
+      eslint-plugin-n: 18.6.0(eslint@10.15.0(jiti@2.7.0)(supports-color@10.2.2))(typescript@6.0.3)
       eslint-plugin-prettier: 5.5.7(@types/eslint@9.6.1)(eslint-config-prettier@10.1.8(eslint@10.15.0(jiti@2.7.0)(supports-color@10.2.2)))(eslint@10.15.0(jiti@2.7.0)(supports-color@10.2.2))(prettier@3.10.1)
       eslint-plugin-regexp: 3.3.3(eslint@10.15.0(jiti@2.7.0)(supports-color@10.2.2))
       eslint-plugin-unicorn: 75.0.0(eslint@10.15.0(jiti@2.7.0)(supports-color@10.2.2))
@@ -2740,7 +2740,7 @@ snapshots:
       - '@typescript/native'
       - supports-color
 
-  eslint-plugin-n@18.5.0(eslint@10.15.0(jiti@2.7.0)(supports-color@10.2.2))(typescript@6.0.3):
+  eslint-plugin-n@18.6.0(eslint@10.15.0(jiti@2.7.0)(supports-color@10.2.2))(typescript@6.0.3):
     dependencies:
       '@eslint-community/eslint-utils': 4.10.1(eslint@10.15.0(jiti@2.7.0)(supports-color@10.2.2))
       enhanced-resolve: 5.27.0
@@ -2755,7 +2755,7 @@ snapshots:
     optionalDependencies:
       typescript: 6.0.3
 
-  eslint-plugin-n@18.5.0(eslint@10.15.0(jiti@2.7.0)(supports-color@10.2.2))(typescript@7.0.2):
+  eslint-plugin-n@18.6.0(eslint@10.15.0(jiti@2.7.0)(supports-color@10.2.2))(typescript@7.0.2):
     dependencies:
       '@eslint-community/eslint-utils': 4.10.1(eslint@10.15.0(jiti@2.7.0)(supports-color@10.2.2))
       enhanced-resolve: 5.27.0
